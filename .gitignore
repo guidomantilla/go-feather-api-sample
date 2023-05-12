@@ -31,5 +31,4 @@ vendor/
 sonar-project.properties
 
 .envrc
-main.go
 
