@@ -6,7 +6,7 @@ import (
 	"github.com/guidomantilla/go-feather-api-sample/pkg/validation"
 )
 
-type PrincipalService interface {
+type PrincipalManager interface {
 	Create(ctx context.Context, principal *Principal) error
 	Update(ctx context.Context, principal *Principal) error
 	Delete(ctx context.Context, username string) error

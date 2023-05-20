@@ -53,18 +53,18 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		SignUpDone:         feather_commons_util.ValueToPtr(true),
 		Authorities:        nil,
 	}
-	principalService := security.NewInMemoryPrincipalService(passwordManager)
+	principalManager := security.NewInMemoryPrincipalManager(passwordManager)
 
 	var err error
-	if err = principalService.Create(context.Background(), root); err != nil {
+	if err = principalManager.Create(context.Background(), root); err != nil {
 		zap.L().Fatal(err.Error())
 		return
 	}
 
-	authenticationService := security.NewDefaultAuthenticationService(tokenTokenManager, principalService)
+	authenticationService := security.NewDefaultAuthenticationService(tokenTokenManager, principalManager)
 	authenticationEndpoint := security.NewDefaultAuthenticationEndpoint(authenticationService)
 
-	authorizationService := security.NewDefaultAuthorizationService(tokenTokenManager, principalService)
+	authorizationService := security.NewDefaultAuthorizationService(tokenTokenManager, principalManager)
 	authorizationFilter := security.NewDefaultAuthorizationFilter(authorizationService)
 
 	router := gin.Default()
