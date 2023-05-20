@@ -51,7 +51,17 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		PasswordNonExpired: feather_commons_util.ValueToPtr(true),
 		Enabled:            feather_commons_util.ValueToPtr(true),
 		SignUpDone:         feather_commons_util.ValueToPtr(true),
-		Authorities:        nil,
+		Authorities: feather_commons_util.ValueToPtr([]security.GrantedAuthority{
+			{
+				Role: feather_commons_util.ValueToPtr("rol01"),
+			},
+			{
+				Role: feather_commons_util.ValueToPtr("rol02"),
+			},
+			{
+				Role: feather_commons_util.ValueToPtr("rol03"),
+			},
+		}),
 	}
 	principalManager := security.NewInMemoryPrincipalManager(passwordManager)
 

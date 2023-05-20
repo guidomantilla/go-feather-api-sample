@@ -110,6 +110,9 @@ func (manager *InMemoryPrincipalManager) Authenticate(ctx context.Context, princ
 		return ErrFailedAuthentication
 	}
 
+	principal.Password = nil
+	principal.Authorities = user.Authorities
+
 	return nil
 }
 

@@ -1,6 +1,7 @@
 package security
 
 import (
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -30,8 +31,6 @@ func NewDefaultTokenTokenManager(issuer string, timeout time.Duration, secretKey
 }
 
 func (manager *DefaultTokenTokenManager) Generate(principal *Principal) (*string, error) {
-
-	principal.Password = nil
 
 	claims := &DefaultClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -92,9 +91,24 @@ func (manager *DefaultTokenTokenManager) Validate(tokenString string) (*Principa
 		return nil, errors.New("invalid token")
 	}
 
-	principal := &Principal{
-		Username: feather_commons_util.ValueToPtr(username),
+	if value, ok = mapClaims["authorities"]; !ok {
+		return nil, errors.New("invalid token")
 	}
 
-	return principal, err
+	var authoritiesBytes []byte
+	if authoritiesBytes, err = json.Marshal(value); err != nil {
+		return nil, errors.New("invalid token")
+	}
+
+	var grantedAuthorities []GrantedAuthority
+	if err = json.Unmarshal(authoritiesBytes, &grantedAuthorities); err != nil {
+		return nil, errors.New("invalid token")
+	}
+
+	principal := &Principal{
+		Username:    feather_commons_util.ValueToPtr(username),
+		Authorities: feather_commons_util.ValueToPtr(grantedAuthorities),
+	}
+
+	return principal, nil
 }
