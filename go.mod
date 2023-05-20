@@ -50,3 +50,5 @@ require (
 )
 
 replace github.com/guidomantilla/go-feather-commons => ../go-feather-commons
+
+replace github.com/guidomantilla/go-feather-web => ../go-feather-web
