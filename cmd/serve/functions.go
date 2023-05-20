@@ -9,9 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	jwt "github.com/golang-jwt/jwt/v5"
 	feather_commons_config "github.com/guidomantilla/go-feather-commons/pkg/config"
-	feather_commons_security "github.com/guidomantilla/go-feather-commons/pkg/security"
 	feather_commons_util "github.com/guidomantilla/go-feather-commons/pkg/util"
-	"github.com/guidomantilla/go-feather-web/pkg/security"
+	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
 	"github.com/qmdx00/lifecycle"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -37,13 +36,13 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 
 	environment := feather_commons_config.Init(args)
 
-	passwordGenerator := feather_commons_security.NewDefaultPasswordGenerator()
-	bcryptPasswordEncoder := feather_commons_security.NewBcryptPasswordEncoder()
-	passwordEncoder := feather_commons_security.NewDelegatingPasswordEncoder(bcryptPasswordEncoder)
-	passwordManager := feather_commons_security.NewDefaultPasswordManager(passwordEncoder, passwordGenerator)
-	tokenTokenManager := security.NewDefaultTokenTokenManager(appName, time.Hour*24, []byte("SecretYouShouldHide"), jwt.SigningMethodHS512)
+	passwordGenerator := feather_security.NewDefaultPasswordGenerator()
+	bcryptPasswordEncoder := feather_security.NewBcryptPasswordEncoder()
+	passwordEncoder := feather_security.NewDelegatingPasswordEncoder(bcryptPasswordEncoder)
+	passwordManager := feather_security.NewDefaultPasswordManager(passwordEncoder, passwordGenerator)
+	tokenTokenManager := feather_security.NewJwtTokenManager(appName, time.Hour*24, []byte("SecretYouShouldHide"), jwt.SigningMethodHS512)
 
-	root := &security.Principal{
+	root := &feather_security.Principal{
 		Username:           feather_commons_util.ValueToPtr("root"),
 		Password:           feather_commons_util.ValueToPtr("RaveN123qweasd*+"),
 		AccountNonExpired:  feather_commons_util.ValueToPtr(true),
@@ -51,7 +50,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		PasswordNonExpired: feather_commons_util.ValueToPtr(true),
 		Enabled:            feather_commons_util.ValueToPtr(true),
 		SignUpDone:         feather_commons_util.ValueToPtr(true),
-		Authorities: feather_commons_util.ValueToPtr([]security.GrantedAuthority{
+		Authorities: feather_commons_util.ValueToPtr([]feather_security.GrantedAuthority{
 			{
 				Role: feather_commons_util.ValueToPtr("rol01"),
 			},
@@ -63,7 +62,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 			},
 		}),
 	}
-	principalManager := security.NewInMemoryPrincipalManager(passwordManager)
+	principalManager := feather_security.NewInMemoryPrincipalManager(passwordManager)
 
 	var err error
 	if err = principalManager.Create(context.Background(), root); err != nil {
@@ -71,11 +70,11 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		return
 	}
 
-	authenticationService := security.NewDefaultAuthenticationService(tokenTokenManager, principalManager)
-	authenticationEndpoint := security.NewDefaultAuthenticationEndpoint(authenticationService)
+	authenticationService := feather_security.NewDefaultAuthenticationService(tokenTokenManager, principalManager)
+	authenticationEndpoint := feather_security.NewDefaultAuthenticationEndpoint(authenticationService)
 
-	authorizationService := security.NewDefaultAuthorizationService(tokenTokenManager, principalManager)
-	authorizationFilter := security.NewDefaultAuthorizationFilter(authorizationService)
+	authorizationService := feather_security.NewDefaultAuthorizationService(tokenTokenManager, principalManager)
+	authorizationFilter := feather_security.NewDefaultAuthorizationFilter(authorizationService)
 
 	router := gin.Default()
 	router.POST("/login", authenticationEndpoint.Authenticate)

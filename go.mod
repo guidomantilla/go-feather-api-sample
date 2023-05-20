@@ -4,15 +4,15 @@ go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.9.0
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang/mock v1.6.0
 	github.com/guidomantilla/go-feather-commons v0.2.3
+	github.com/guidomantilla/go-feather-security v0.0.1
 	github.com/guidomantilla/go-feather-web v0.0.1
 	github.com/qmdx00/lifecycle v1.1.1
 	github.com/spf13/cobra v1.7.0
 	go.uber.org/zap v1.24.0
 )
-
-require github.com/golang-jwt/jwt/v5 v5.0.0
 
 require (
 	github.com/bytedance/sonic v1.8.0 // indirect
@@ -49,6 +49,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/guidomantilla/go-feather-commons => ../go-feather-commons
-
-replace github.com/guidomantilla/go-feather-web => ../go-feather-web
+replace (
+	github.com/guidomantilla/go-feather-commons => ../go-feather-commons
+	github.com/guidomantilla/go-feather-security => ../go-feather-security
+	github.com/guidomantilla/go-feather-web => ../go-feather-web
+)
