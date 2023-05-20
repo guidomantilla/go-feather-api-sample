@@ -11,12 +11,12 @@ import (
 	feather_commons_config "github.com/guidomantilla/go-feather-commons/pkg/config"
 	feather_commons_security "github.com/guidomantilla/go-feather-commons/pkg/security"
 	feather_commons_util "github.com/guidomantilla/go-feather-commons/pkg/util"
+	"github.com/guidomantilla/go-feather-web/pkg/security"
 	"github.com/qmdx00/lifecycle"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
 	"github.com/guidomantilla/go-feather-api-sample/internal/config"
-	"github.com/guidomantilla/go-feather-api-sample/pkg/security"
 )
 
 func ExecuteCmdFn(_ *cobra.Command, args []string) {

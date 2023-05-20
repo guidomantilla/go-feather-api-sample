@@ -5,9 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/guidomantilla/go-feather-commons/pkg/environment"
+	"github.com/guidomantilla/go-feather-web/pkg/server"
 	"github.com/qmdx00/lifecycle"
-
-	"github.com/guidomantilla/go-feather-api-sample/pkg/server"
 )
 
 func InitGinServer(environment environment.Environment, router *gin.Engine) lifecycle.Server {
