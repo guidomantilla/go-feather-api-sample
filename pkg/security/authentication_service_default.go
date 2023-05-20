@@ -5,13 +5,13 @@ import (
 )
 
 type DefaultAuthenticationService struct {
-	tokenGenerator         TokenGenerator
+	tokenManager           TokenManager
 	authenticationDelegate AuthenticationDelegate
 }
 
-func NewDefaultAuthenticationService(tokenGenerator TokenGenerator, authenticationDelegate AuthenticationDelegate) *DefaultAuthenticationService {
+func NewDefaultAuthenticationService(tokenManager TokenManager, authenticationDelegate AuthenticationDelegate) *DefaultAuthenticationService {
 	return &DefaultAuthenticationService{
-		tokenGenerator:         tokenGenerator,
+		tokenManager:           tokenManager,
 		authenticationDelegate: authenticationDelegate,
 	}
 }
@@ -24,7 +24,7 @@ func (service *DefaultAuthenticationService) Authenticate(ctx context.Context, p
 	}
 
 	var token *string
-	if token, err = service.tokenGenerator.Generate(principal); err != nil {
+	if token, err = service.tokenManager.Generate(principal); err != nil {
 		return nil, err
 	}
 

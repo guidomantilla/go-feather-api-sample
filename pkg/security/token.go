@@ -1,5 +1,6 @@
 package security
 
-type TokenGenerator interface {
+type TokenManager interface {
 	Generate(principal *Principal) (*string, error)
+	Validate(tokenString string) (*Principal, error)
 }

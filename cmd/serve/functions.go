@@ -41,8 +41,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 	bcryptPasswordEncoder := feather_commons_security.NewBcryptPasswordEncoder()
 	passwordEncoder := feather_commons_security.NewDelegatingPasswordEncoder(bcryptPasswordEncoder)
 	passwordManager := feather_commons_security.NewDefaultPasswordManager(passwordEncoder, passwordGenerator)
-
-	tokenGenerator := security.NewDefaultTokenGenerator(appName, time.Minute*15, []byte("SecretYouShouldHide"), jwt.SigningMethodHS512)
+	tokenTokenManager := security.NewDefaultTokenTokenManager(appName, time.Hour*24, []byte("SecretYouShouldHide"), jwt.SigningMethodHS512)
 
 	root := &security.Principal{
 		Username:           feather_commons_util.ValueToPtr("root"),
@@ -62,23 +61,20 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		return
 	}
 
-	authenticationDelegate := principalService
-	authenticationService := security.NewDefaultAuthenticationService(tokenGenerator, authenticationDelegate)
+	authenticationService := security.NewDefaultAuthenticationService(tokenTokenManager, principalService)
 	authenticationEndpoint := security.NewDefaultAuthenticationEndpoint(authenticationService)
 
-	tokenValidatorFilter := func(ctx *gin.Context) {
-
-		ctx.Next()
-	}
+	authorizationService := security.NewDefaultAuthorizationService(tokenTokenManager, principalService)
+	authorizationFilter := security.NewDefaultAuthorizationFilter(authorizationService)
 
 	router := gin.Default()
-	router.POST("/login", authenticationEndpoint.Login)
-	router.NoRoute(tokenValidatorFilter, func(c *gin.Context) {
+	router.POST("/login", authenticationEndpoint.Authenticate)
+	router.NoRoute(authorizationFilter.Authorize, func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
 
 	apiGroup := router.Group("/api")
-	apiGroup.Use(tokenValidatorFilter)
+	apiGroup.Use(authorizationFilter.Authorize)
 	apiGroup.GET("/info", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"status": "we are ok"})
 	})

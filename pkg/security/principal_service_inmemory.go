@@ -3,6 +3,7 @@ package security
 import (
 	"context"
 	"errors"
+	"reflect"
 
 	"github.com/guidomantilla/go-feather-commons/pkg/security"
 )
@@ -87,11 +88,11 @@ func (service *InMemoryPrincipalService) ChangePassword(ctx context.Context, pri
 	return nil
 }
 
-func (service *InMemoryPrincipalService) Authenticate(_ context.Context, principal *Principal) error {
+func (service *InMemoryPrincipalService) Authenticate(ctx context.Context, principal *Principal) error {
 
-	var ok bool
+	var err error
 	var user *Principal
-	if user, ok = service.repository[*principal.Username]; !ok {
+	if user, err = service.Find(ctx, *principal.Username); err != nil {
 		return ErrFailedAuthentication
 	}
 
@@ -99,7 +100,6 @@ func (service *InMemoryPrincipalService) Authenticate(_ context.Context, princip
 		return ErrFailedAuthentication
 	}
 
-	var err error
 	var matches *bool
 	if matches, err = service.passwordManager.Matches(*(user.Password), *principal.Password); err != nil || !*(matches) {
 		return ErrFailedAuthentication
@@ -108,6 +108,21 @@ func (service *InMemoryPrincipalService) Authenticate(_ context.Context, princip
 	var needsUpgrade *bool
 	if needsUpgrade, err = service.passwordManager.UpgradeEncoding(*(user.Password)); err != nil || *(needsUpgrade) {
 		return ErrFailedAuthentication
+	}
+
+	return nil
+}
+
+func (service *InMemoryPrincipalService) Authorize(ctx context.Context, principal *Principal) error {
+
+	var err error
+	var user *Principal
+	if user, err = service.Find(ctx, *principal.Username); err != nil {
+		return ErrFailedAuthorization
+	}
+
+	if !reflect.DeepEqual(user.Authorities, principal.Authorities) {
+		return ErrFailedAuthorization
 	}
 
 	return nil

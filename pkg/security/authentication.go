@@ -7,7 +7,7 @@ import (
 )
 
 type AuthenticationEndpoint interface {
-	Login(ctx *gin.Context)
+	Authenticate(ctx *gin.Context)
 }
 
 type AuthenticationService interface {
