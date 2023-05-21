@@ -1,58 +1,118 @@
 package serve
 
 import (
-	"net/http"
-	"syscall"
+	"context"
 
-	"github.com/gin-gonic/gin"
+	feather_commons_util "github.com/guidomantilla/go-feather-commons/pkg/util"
 	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
-	"github.com/qmdx00/lifecycle"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
-	"github.com/guidomantilla/go-feather-api-sample/internal/config"
+	"github.com/guidomantilla/go-feather-api-sample/pkg/boot"
 )
 
 func ExecuteCmdFn(_ *cobra.Command, args []string) {
 
-	logger, _ := zap.NewDevelopment()
-	zap.ReplaceGlobals(logger)
+	appName := "go-feather-api-sample"
+	builder := boot.NewBeanBuilder()
 
-	app := lifecycle.NewApp(
-		lifecycle.WithName(config.AppName),
-		lifecycle.WithVersion("1.0"),
-		lifecycle.WithSignal(syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGKILL),
-	)
-	//orchestrator.Cleanup(config.Init)
+	err := boot.Init(appName, args, builder, func(ctx boot.ApplicationContext) {
 
-	//
+		root := &feather_security.Principal{
+			Username:           feather_commons_util.ValueToPtr("root"),
+			Password:           feather_commons_util.ValueToPtr("RaveN123qweasd*+"),
+			AccountNonExpired:  feather_commons_util.ValueToPtr(true),
+			AccountNonLocked:   feather_commons_util.ValueToPtr(true),
+			PasswordNonExpired: feather_commons_util.ValueToPtr(true),
+			Enabled:            feather_commons_util.ValueToPtr(true),
+			SignUpDone:         feather_commons_util.ValueToPtr(true),
+			Authorities: feather_commons_util.ValueToPtr([]feather_security.GrantedAuthority{
+				{
+					Role: feather_commons_util.ValueToPtr("rol01"),
+				},
+				{
+					Role: feather_commons_util.ValueToPtr("rol02"),
+				},
+				{
+					Role: feather_commons_util.ValueToPtr("rol03"),
+				},
+			}),
+		}
+		_ = ctx.PrincipalManager.Create(context.Background(), root)
 
-	environment := config.InitEnv(args)
-	passwordManager := config.InitPwd(environment)
-	tokenTokenManager := config.InitToken(environment)
-	principalManager := config.InitPrincipal(environment, passwordManager)
-	authenticationEndpoint, authorizationFilter := config.InitAuthEndpoints(environment, tokenTokenManager,
-		principalManager.(feather_security.AuthenticationDelegate), principalManager.(feather_security.AuthorizationDelegate))
-
-	router := gin.Default()
-	router.POST("/login", authenticationEndpoint.Authenticate)
-	router.NoRoute(authorizationFilter.Authorize, func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
-
-	apiGroup := router.Group("/api")
-	apiGroup.Use(authorizationFilter.Authorize)
-	apiGroup.GET("/info", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"status": "we are ok"})
-	})
-
-	//
-
-	var err error
-	app.Attach("GinServer", config.InitGinServer(environment, router))
-	if err = app.Run(); err != nil {
+	if err != nil {
 		zap.L().Fatal(err.Error())
 	}
-
-	_ = logger.Sync()
 }
+
+/*
+func fullSample(_ *cobra.Command, args []string) {
+	appName := "go-feather-api-sample"
+	var authenticationDelegate feather_security.AuthenticationDelegate
+	var authorizationDelegate feather_security.AuthorizationDelegate
+	builder := &boot.BeanBuilder{
+		PasswordEncoder: func() feather_security.PasswordEncoder {
+			return feather_security.NewBcryptPasswordEncoder()
+		},
+		PasswordGenerator: func() feather_security.PasswordGenerator {
+			return feather_security.NewDefaultPasswordGenerator()
+		},
+		PrincipalManager: func(passwordManager feather_security.PasswordManager) feather_security.PrincipalManager {
+
+			principalManager := feather_security.NewInMemoryPrincipalManager(passwordManager)
+			authenticationDelegate, authorizationDelegate = principalManager, principalManager
+
+			root := &feather_security.Principal{
+				Username:           feather_commons_util.ValueToPtr("root"),
+				Password:           feather_commons_util.ValueToPtr("RaveN123qweasd*+"),
+				AccountNonExpired:  feather_commons_util.ValueToPtr(true),
+				AccountNonLocked:   feather_commons_util.ValueToPtr(true),
+				PasswordNonExpired: feather_commons_util.ValueToPtr(true),
+				Enabled:            feather_commons_util.ValueToPtr(true),
+				SignUpDone:         feather_commons_util.ValueToPtr(true),
+				Authorities: feather_commons_util.ValueToPtr([]feather_security.GrantedAuthority{
+					{
+						Role: feather_commons_util.ValueToPtr("rol01"),
+					},
+					{
+						Role: feather_commons_util.ValueToPtr("rol02"),
+					},
+					{
+						Role: feather_commons_util.ValueToPtr("rol03"),
+					},
+				}),
+			}
+			_ = principalManager.Create(context.Background(), root)
+			return principalManager
+		},
+		TokenManager: func(secret string) feather_security.TokenManager {
+			return feather_security.NewJwtTokenManager([]byte(secret), feather_security.WithIssuer(appName))
+		},
+		AuthenticationDelegate: func() feather_security.AuthenticationDelegate {
+			return authenticationDelegate
+		},
+		AuthenticationService: func(tokenManager feather_security.TokenManager, authenticationDelegate feather_security.AuthenticationDelegate) feather_security.AuthenticationService {
+			return feather_security.NewDefaultAuthenticationService(tokenManager, authenticationDelegate)
+		},
+		AuthorizationDelegate: func() feather_security.AuthorizationDelegate {
+			return authorizationDelegate
+		},
+		AuthorizationService: func(tokenManager feather_security.TokenManager, authorizationDelegate feather_security.AuthorizationDelegate) feather_security.AuthorizationService {
+			return feather_security.NewDefaultAuthorizationService(tokenManager, authorizationDelegate)
+		},
+		AuthenticationEndpoint: func(authenticationService feather_security.AuthenticationService) feather_security.AuthenticationEndpoint {
+			return feather_security.NewDefaultAuthenticationEndpoint(authenticationService)
+		},
+		AuthorizationFilter: func(authorizationService feather_security.AuthorizationService) feather_security.AuthorizationFilter {
+			return feather_security.NewDefaultAuthorizationFilter(authorizationService)
+		},
+	}
+	err := boot.Init(appName, args, builder, func(ctx boot.ApplicationContext) {
+
+	})
+	if err != nil {
+		zap.L().Fatal(err.Error())
+	}
+}
+*/
