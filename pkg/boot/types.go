@@ -1,6 +1,7 @@
 package boot
 
 import (
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -32,9 +33,9 @@ type PrincipalManagerBuilderFunc func(passwordManager feather_security.PasswordM
 
 type TokenManagerBuilderFunc func(secret string) feather_security.TokenManager
 
-type AuthenticationDelegateBuilderFunc func() feather_security.AuthenticationDelegate
+type AuthenticationDelegateBuilderFunc func() feather_security.AuthenticationService
 
-type AuthenticationServiceBuilderFunc func(tokenManager feather_security.TokenManager, authenticationDelegate feather_security.AuthenticationDelegate) feather_security.AuthenticationService
+type AuthenticationServiceBuilderFunc func(tokenManager feather_security.TokenManager, authenticationDelegate feather_security.AuthenticationService) feather_security.AuthenticationService
 
 type AuthorizationDelegateBuilderFunc func() feather_security.AuthorizationDelegate
 
@@ -71,10 +72,10 @@ func NewBeanBuilder() *BeanBuilder {
 		TokenManager: func(secret string) feather_security.TokenManager {
 			return nil
 		},
-		AuthenticationDelegate: func() feather_security.AuthenticationDelegate {
+		AuthenticationDelegate: func() feather_security.AuthenticationService {
 			return nil
 		},
-		AuthenticationService: func(tokenManager feather_security.TokenManager, authenticationDelegate feather_security.AuthenticationDelegate) feather_security.AuthenticationService {
+		AuthenticationService: func(tokenManager feather_security.TokenManager, authenticationDelegate feather_security.AuthenticationService) feather_security.AuthenticationService {
 			return nil
 		},
 		AuthorizationDelegate: func() feather_security.AuthorizationDelegate {
@@ -99,13 +100,14 @@ type ApplicationContext struct {
 	PasswordGenerator      feather_security.PasswordGenerator
 	PrincipalManager       feather_security.PrincipalManager
 	TokenManager           feather_security.TokenManager
-	AuthenticationDelegate feather_security.AuthenticationDelegate
+	AuthenticationDelegate feather_security.AuthenticationService
 	AuthenticationService  feather_security.AuthenticationService
 	AuthenticationEndpoint feather_security.AuthenticationEndpoint
 	AuthorizationDelegate  feather_security.AuthorizationDelegate
 	AuthorizationService   feather_security.AuthorizationService
 	AuthorizationFilter    feather_security.AuthorizationFilter
 	Router                 *gin.Engine
+	SecureRouter           *gin.RouterGroup
 }
 
 func NewApplicationContext(appName string, args []string, builder *BeanBuilder) *ApplicationContext {
@@ -149,7 +151,7 @@ func NewApplicationContext(appName string, args []string, builder *BeanBuilder) 
 	}
 
 	if ctx.AuthenticationDelegate = builder.AuthenticationDelegate(); ctx.AuthenticationDelegate == nil {
-		ctx.AuthenticationDelegate = ctx.PrincipalManager.(feather_security.AuthenticationDelegate)
+		ctx.AuthenticationDelegate = feather_security.NewDefaultAuthenticationDelegate(passwordManager, ctx.PrincipalManager)
 	}
 	if ctx.AuthenticationService = builder.AuthenticationService(ctx.TokenManager, ctx.AuthenticationDelegate); ctx.AuthenticationService == nil {
 		ctx.AuthenticationService = feather_security.NewDefaultAuthenticationService(ctx.TokenManager, ctx.AuthenticationDelegate)
@@ -159,7 +161,7 @@ func NewApplicationContext(appName string, args []string, builder *BeanBuilder) 
 	}
 
 	if ctx.AuthorizationDelegate = builder.AuthorizationDelegate(); ctx.AuthorizationDelegate == nil {
-		ctx.AuthorizationDelegate = ctx.PrincipalManager.(feather_security.AuthorizationDelegate)
+		ctx.AuthorizationDelegate = feather_security.NewDefaultAuthorizationDelegate(ctx.PrincipalManager)
 	}
 	if ctx.AuthorizationService = builder.AuthorizationService(ctx.TokenManager, ctx.AuthorizationDelegate); ctx.AuthorizationService == nil {
 		ctx.AuthorizationService = feather_security.NewDefaultAuthorizationService(ctx.TokenManager, ctx.AuthorizationDelegate)
@@ -169,6 +171,14 @@ func NewApplicationContext(appName string, args []string, builder *BeanBuilder) 
 	}
 
 	ctx.Router = gin.Default()
+	ctx.Router.POST("/login", ctx.AuthenticationEndpoint.Authenticate)
+	ctx.Router.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{"status": "alive"})
+	})
+	ctx.Router.NoRoute(ctx.AuthorizationFilter.Authorize, func(c *gin.Context) {
+		c.JSON(http.StatusNotFound, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+	})
+	ctx.SecureRouter = ctx.Router.Group("/api", ctx.AuthorizationFilter.Authorize)
 
 	return &ctx
 }
