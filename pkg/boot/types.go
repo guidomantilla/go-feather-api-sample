@@ -1,13 +1,15 @@
 package boot
 
 import (
-	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/guidomantilla/go-feather-commons/pkg/environment"
-	"github.com/guidomantilla/go-feather-commons/pkg/properties"
+	feather_commons_environment "github.com/guidomantilla/go-feather-commons/pkg/environment"
+	feather_commons_properties "github.com/guidomantilla/go-feather-commons/pkg/properties"
 	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
+	feather_sql_config "github.com/guidomantilla/go-feather-sql/pkg/config"
+	feather_sql_datasource "github.com/guidomantilla/go-feather-sql/pkg/datasource"
+	feather_sql "github.com/guidomantilla/go-feather-sql/pkg/sql"
 	"go.uber.org/zap"
 )
 
@@ -16,6 +18,12 @@ const (
 	CmdPropertySourceName = "CMD_PROPERTY_SOURCE_NAME"
 	HostPort              = "HOST_PORT"
 	TokenSignatureKey     = "TOKEN_SIGNATURE_KEY"
+	DatasourceDriver      = "DATASOURCE_DRIVER"
+	DatasourceUsername    = "DATASOURCE_USERNAME"
+	DatasourcePassword    = "DATASOURCE_PASSWORD"
+	DatasourceServer      = "DATASOURCE_SERVER"
+	DatasourceService     = "DATASOURCE_SERVICE"
+	DatasourceUrl         = "DATASOURCE_URL"
 )
 
 var (
@@ -94,20 +102,22 @@ func NewBeanBuilder() *BeanBuilder {
 }
 
 type ApplicationContext struct {
-	AppName                string
-	Environment            environment.Environment
-	PasswordEncoder        feather_security.PasswordEncoder
-	PasswordGenerator      feather_security.PasswordGenerator
-	PrincipalManager       feather_security.PrincipalManager
-	TokenManager           feather_security.TokenManager
-	AuthenticationDelegate feather_security.AuthenticationService
-	AuthenticationService  feather_security.AuthenticationService
-	AuthenticationEndpoint feather_security.AuthenticationEndpoint
-	AuthorizationDelegate  feather_security.AuthorizationDelegate
-	AuthorizationService   feather_security.AuthorizationService
-	AuthorizationFilter    feather_security.AuthorizationFilter
-	Router                 *gin.Engine
-	SecureRouter           *gin.RouterGroup
+	AppName                     string
+	Environment                 feather_commons_environment.Environment
+	RelationalDatasource        feather_sql_datasource.RelationalDatasource
+	RelationalDatasourceContext feather_sql_datasource.RelationalDatasourceContext
+	PasswordEncoder             feather_security.PasswordEncoder
+	PasswordGenerator           feather_security.PasswordGenerator
+	PrincipalManager            feather_security.PrincipalManager
+	TokenManager                feather_security.TokenManager
+	AuthenticationDelegate      feather_security.AuthenticationService
+	AuthenticationService       feather_security.AuthenticationService
+	AuthenticationEndpoint      feather_security.AuthenticationEndpoint
+	AuthorizationDelegate       feather_security.AuthorizationDelegate
+	AuthorizationService        feather_security.AuthorizationService
+	AuthorizationFilter         feather_security.AuthorizationFilter
+	Router                      *gin.Engine
+	SecureRouter                *gin.RouterGroup
 }
 
 func NewApplicationContext(appName string, args []string, builder *BeanBuilder) *ApplicationContext {
@@ -124,13 +134,38 @@ func NewApplicationContext(appName string, args []string, builder *BeanBuilder) 
 		zap.L().Fatal("starting up - error setting up the ApplicationContext: builder is nil")
 	}
 
-	ctx := ApplicationContext{}
+	ctx := &ApplicationContext{}
 	ctx.AppName = appName
 
+	BuildEnvironment(ctx, args)
+	BuildSecurity(ctx, builder)
+
+	ctx.Router = gin.Default()
+
+	return ctx
+}
+
+func BuildEnvironment(ctx *ApplicationContext, args []string) {
+
+	zap.L().Info("starting up - setting up environment variables")
+
 	osArgs := os.Environ()
-	osSource := properties.NewDefaultPropertySource(OsPropertySourceName, properties.NewDefaultProperties(properties.FromArray(&osArgs)))
-	cmdSource := properties.NewDefaultPropertySource(CmdPropertySourceName, properties.NewDefaultProperties(properties.FromArray(&args)))
-	ctx.Environment = environment.NewDefaultEnvironment(environment.WithPropertySources(osSource, cmdSource))
+	osSource := feather_commons_properties.NewDefaultPropertySource(OsPropertySourceName, feather_commons_properties.NewDefaultProperties(feather_commons_properties.FromArray(&osArgs)))
+	cmdSource := feather_commons_properties.NewDefaultPropertySource(CmdPropertySourceName, feather_commons_properties.NewDefaultProperties(feather_commons_properties.FromArray(&args)))
+	ctx.Environment = feather_commons_environment.NewDefaultEnvironment(feather_commons_environment.WithPropertySources(osSource, cmdSource))
+}
+
+func BuildDatasource(ctx *ApplicationContext, builder *BeanBuilder) {
+
+	zap.L().Info("starting up - setting up DB connection")
+
+	ctx.RelationalDatasource, ctx.RelationalDatasourceContext = feather_sql_config.Init("", ctx.Environment, feather_sql.NumberedParamHolder)
+
+}
+
+func BuildSecurity(ctx *ApplicationContext, builder *BeanBuilder) {
+
+	zap.L().Info("starting up - setting up security")
 
 	if ctx.PasswordEncoder = builder.PasswordEncoder(); ctx.PasswordEncoder == nil {
 		ctx.PasswordEncoder = feather_security.NewBcryptPasswordEncoder()
@@ -169,16 +204,4 @@ func NewApplicationContext(appName string, args []string, builder *BeanBuilder) 
 	if ctx.AuthorizationFilter = builder.AuthorizationFilter(ctx.AuthorizationService); ctx.AuthorizationFilter == nil {
 		ctx.AuthorizationFilter = feather_security.NewDefaultAuthorizationFilter(ctx.AuthorizationService)
 	}
-
-	ctx.Router = gin.Default()
-	ctx.Router.POST("/login", ctx.AuthenticationEndpoint.Authenticate)
-	ctx.Router.GET("/health", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"status": "alive"})
-	})
-	ctx.Router.NoRoute(ctx.AuthorizationFilter.Authorize, func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
-	})
-	ctx.SecureRouter = ctx.Router.Group("/api", ctx.AuthorizationFilter.Authorize)
-
-	return &ctx
 }
