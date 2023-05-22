@@ -4,12 +4,15 @@ go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.9.0
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang/mock v1.6.0
 	github.com/guidomantilla/go-feather-commons v0.3.0
 	github.com/guidomantilla/go-feather-security v0.3.0
 	github.com/guidomantilla/go-feather-sql v0.3.0
 	github.com/guidomantilla/go-feather-web v0.3.0
+	github.com/jackc/pgx/v4 v4.18.1
 	github.com/qmdx00/lifecycle v1.1.1
+	github.com/sijms/go-ora/v2 v2.7.6
 	github.com/spf13/cobra v1.7.0
 	go.uber.org/zap v1.24.0
 )
@@ -26,6 +29,13 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
+	github.com/jackc/pgconn v1.14.0 // indirect
+	github.com/jackc/pgio v1.0.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgproto3/v2 v2.3.2 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
+	github.com/jackc/pgtype v1.14.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect

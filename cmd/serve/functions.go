@@ -15,7 +15,7 @@ import (
 
 func ExecuteCmdFn(_ *cobra.Command, args []string) {
 
-	appName, version := "go-feather-api-sample", "v0.0.1"
+	appName, version := "go-feather-api-sample", "v0.3.0"
 	builder := boot.NewBeanBuilder()
 
 	builder.AuthenticationDelegate = func() feather_security.AuthenticationService {

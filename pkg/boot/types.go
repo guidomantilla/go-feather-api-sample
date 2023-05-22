@@ -265,19 +265,19 @@ func (ctx *ApplicationContext) Stop() {
 	if ctx.RelationalDatasource != nil && ctx.RelationalDatasourceContext != nil {
 
 		var database *sql.DB
-		zap.L().Info(fmt.Sprintf("shutting down - closing up DB connection %s", ctx.AppName))
+		zap.L().Info("shutting down - closing up db connection")
 
 		if database, err = ctx.RelationalDatasource.GetDatabase(); err != nil {
-			zap.L().Error(fmt.Sprintf("shutting down - error closing DB connection: %s", err.Error()))
+			zap.L().Error(fmt.Sprintf("shutting down - error db connection: %s", err.Error()))
 			return
 		}
 
 		if err = database.Close(); err != nil {
-			zap.L().Error(fmt.Sprintf("shutting down - error closing DB connection: %s", err.Error()))
+			zap.L().Error(fmt.Sprintf("shutting down - error closing db connection: %s", err.Error()))
 			return
 		}
 
-		zap.L().Info(fmt.Sprintf("shutting down - DB connection closed %s", ctx.AppName))
+		zap.L().Info("shutting down - db connection closed")
 	}
 
 	zap.L().Info(fmt.Sprintf("shutting down - ApplicationContext closed %s", ctx.AppName))
