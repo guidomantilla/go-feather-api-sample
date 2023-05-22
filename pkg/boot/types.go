@@ -1,13 +1,15 @@
 package boot
 
 import (
+	"database/sql"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	feather_commons_environment "github.com/guidomantilla/go-feather-commons/pkg/environment"
 	feather_commons_properties "github.com/guidomantilla/go-feather-commons/pkg/properties"
 	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
-	feather_sql_config "github.com/guidomantilla/go-feather-sql/pkg/config"
 	feather_sql_datasource "github.com/guidomantilla/go-feather-sql/pkg/datasource"
 	feather_sql "github.com/guidomantilla/go-feather-sql/pkg/sql"
 	"go.uber.org/zap"
@@ -18,6 +20,7 @@ const (
 	CmdPropertySourceName = "CMD_PROPERTY_SOURCE_NAME"
 	HostPort              = "HOST_PORT"
 	TokenSignatureKey     = "TOKEN_SIGNATURE_KEY"
+	ParamHolder           = "PARAM_HOLDER"
 	DatasourceDriver      = "DATASOURCE_DRIVER"
 	DatasourceUsername    = "DATASOURCE_USERNAME"
 	DatasourcePassword    = "DATASOURCE_PASSWORD"
@@ -30,8 +33,11 @@ var (
 	EnvVarDefaultValuesMap = map[string]string{
 		HostPort:          ":8080",
 		TokenSignatureKey: "SecretYouShouldHide",
+		ParamHolder:       "named",
 	}
 )
+
+type RelationalDatasourceContextBuilderFunc func() feather_sql_datasource.RelationalDatasourceContext
 
 type PasswordGeneratorBuilderFunc func() feather_security.PasswordGenerator
 
@@ -54,20 +60,24 @@ type AuthenticationEndpointBuilderFunc func(authenticationService feather_securi
 type AuthorizationFilterBuilderFunc func(authorizationService feather_security.AuthorizationService) feather_security.AuthorizationFilter
 
 type BeanBuilder struct {
-	PasswordEncoder        PasswordEncoderBuilderFunc
-	PasswordGenerator      PasswordGeneratorBuilderFunc
-	PrincipalManager       PrincipalManagerBuilderFunc
-	TokenManager           TokenManagerBuilderFunc
-	AuthenticationDelegate AuthenticationDelegateBuilderFunc
-	AuthenticationService  AuthenticationServiceBuilderFunc
-	AuthorizationDelegate  AuthorizationDelegateBuilderFunc
-	AuthorizationService   AuthorizationServiceBuilderFunc
-	AuthenticationEndpoint AuthenticationEndpointBuilderFunc
-	AuthorizationFilter    AuthorizationFilterBuilderFunc
+	RelationalDatasourceContext RelationalDatasourceContextBuilderFunc
+	PasswordEncoder             PasswordEncoderBuilderFunc
+	PasswordGenerator           PasswordGeneratorBuilderFunc
+	PrincipalManager            PrincipalManagerBuilderFunc
+	TokenManager                TokenManagerBuilderFunc
+	AuthenticationDelegate      AuthenticationDelegateBuilderFunc
+	AuthenticationService       AuthenticationServiceBuilderFunc
+	AuthorizationDelegate       AuthorizationDelegateBuilderFunc
+	AuthorizationService        AuthorizationServiceBuilderFunc
+	AuthenticationEndpoint      AuthenticationEndpointBuilderFunc
+	AuthorizationFilter         AuthorizationFilterBuilderFunc
 }
 
 func NewBeanBuilder() *BeanBuilder {
 	return &BeanBuilder{
+		RelationalDatasourceContext: func() feather_sql_datasource.RelationalDatasourceContext {
+			return nil
+		},
 		PasswordEncoder: func() feather_security.PasswordEncoder {
 			return nil
 		},
@@ -104,8 +114,8 @@ func NewBeanBuilder() *BeanBuilder {
 type ApplicationContext struct {
 	AppName                     string
 	Environment                 feather_commons_environment.Environment
-	RelationalDatasource        feather_sql_datasource.RelationalDatasource
 	RelationalDatasourceContext feather_sql_datasource.RelationalDatasourceContext
+	RelationalDatasource        feather_sql_datasource.RelationalDatasource
 	PasswordEncoder             feather_security.PasswordEncoder
 	PasswordGenerator           feather_security.PasswordGenerator
 	PrincipalManager            feather_security.PrincipalManager
@@ -126,6 +136,8 @@ func NewApplicationContext(appName string, args []string, builder *BeanBuilder) 
 		zap.L().Fatal("starting up - error setting up the ApplicationContext: appName is empty")
 	}
 
+	zap.L().Info(fmt.Sprintf("starting up - starting up ApplicationContext %s", appName))
+
 	if args == nil {
 		zap.L().Fatal("starting up - error setting up the ApplicationContext: args is nil")
 	}
@@ -137,15 +149,16 @@ func NewApplicationContext(appName string, args []string, builder *BeanBuilder) 
 	ctx := &ApplicationContext{}
 	ctx.AppName = appName
 
-	BuildEnvironment(ctx, args)
-	BuildSecurity(ctx, builder)
+	buildEnvironment(ctx, args)
+	buildDatasource(ctx, builder)
+	buildSecurity(ctx, builder)
 
 	ctx.Router = gin.Default()
 
 	return ctx
 }
 
-func BuildEnvironment(ctx *ApplicationContext, args []string) {
+func buildEnvironment(ctx *ApplicationContext, args []string) {
 
 	zap.L().Info("starting up - setting up environment variables")
 
@@ -155,15 +168,54 @@ func BuildEnvironment(ctx *ApplicationContext, args []string) {
 	ctx.Environment = feather_commons_environment.NewDefaultEnvironment(feather_commons_environment.WithPropertySources(osSource, cmdSource))
 }
 
-func BuildDatasource(ctx *ApplicationContext, builder *BeanBuilder) {
+func buildDatasource(ctx *ApplicationContext, builder *BeanBuilder) {
 
 	zap.L().Info("starting up - setting up DB connection")
 
-	ctx.RelationalDatasource, ctx.RelationalDatasourceContext = feather_sql_config.Init("", ctx.Environment, feather_sql.NumberedParamHolder)
+	paramHolderName := ctx.Environment.GetValueOrDefault(ParamHolder, EnvVarDefaultValuesMap[ParamHolder]).AsString()
+	var paramHolder feather_sql.ParamHolder
+	if paramHolder = feather_sql.UndefinedParamHolder.ValueFromName(paramHolderName); paramHolder == feather_sql.UndefinedParamHolder {
+		zap.L().Fatal("starting up - error setting up DB config: invalid param holder")
+	}
 
+	driverName := ctx.Environment.GetValue(DatasourceDriver).AsString()
+	var driver feather_sql.DriverName
+	if driver = feather_sql.UndefinedDriverName.ValueFromName(driverName); driver == feather_sql.UndefinedDriverName {
+		zap.L().Fatal("starting up - error setting up DB config: invalid driver name")
+	}
+
+	var url string
+	if url = ctx.Environment.GetValue(DatasourceUrl).AsString(); strings.TrimSpace(url) == "" {
+		zap.L().Fatal("starting up - error setting up DB config: url is empty")
+	}
+
+	var username string
+	if username = ctx.Environment.GetValue(DatasourceUsername).AsString(); strings.TrimSpace(username) == "" {
+		zap.L().Fatal("starting up - error setting up DB config: username is empty")
+	}
+
+	var password string
+	if password = ctx.Environment.GetValue(DatasourcePassword).AsString(); strings.TrimSpace(password) == "" {
+		zap.L().Fatal("starting up - error setting up DB config: password is empty")
+	}
+
+	var server string
+	if server = ctx.Environment.GetValue(DatasourceServer).AsString(); strings.TrimSpace(server) == "" {
+		zap.L().Fatal("starting up - error setting up DB config: server is empty")
+	}
+
+	var service string
+	if service = ctx.Environment.GetValue(DatasourceService).AsString(); strings.TrimSpace(service) == "" {
+		zap.L().Fatal("starting up - error setting up DB config: service is empty")
+	}
+
+	if ctx.RelationalDatasourceContext = builder.RelationalDatasourceContext(); ctx.RelationalDatasourceContext == nil {
+		ctx.RelationalDatasourceContext = feather_sql_datasource.NewDefaultRelationalDatasourceContext(driver, paramHolder, url, username, password, server, service)
+	}
+	ctx.RelationalDatasource = feather_sql_datasource.NewDefaultRelationalDatasource(ctx.RelationalDatasourceContext, sql.Open)
 }
 
-func BuildSecurity(ctx *ApplicationContext, builder *BeanBuilder) {
+func buildSecurity(ctx *ApplicationContext, builder *BeanBuilder) {
 
 	zap.L().Info("starting up - setting up security")
 
@@ -204,4 +256,29 @@ func BuildSecurity(ctx *ApplicationContext, builder *BeanBuilder) {
 	if ctx.AuthorizationFilter = builder.AuthorizationFilter(ctx.AuthorizationService); ctx.AuthorizationFilter == nil {
 		ctx.AuthorizationFilter = feather_security.NewDefaultAuthorizationFilter(ctx.AuthorizationService)
 	}
+}
+
+func (ctx *ApplicationContext) Stop() {
+
+	var err error
+
+	if ctx.RelationalDatasource != nil && ctx.RelationalDatasourceContext != nil {
+
+		var database *sql.DB
+		zap.L().Info(fmt.Sprintf("shutting down - closing up DB connection %s", ctx.AppName))
+
+		if database, err = ctx.RelationalDatasource.GetDatabase(); err != nil {
+			zap.L().Error(fmt.Sprintf("shutting down - error closing DB connection: %s", err.Error()))
+			return
+		}
+
+		if err = database.Close(); err != nil {
+			zap.L().Error(fmt.Sprintf("shutting down - error closing DB connection: %s", err.Error()))
+			return
+		}
+
+		zap.L().Info(fmt.Sprintf("shutting down - DB connection closed %s", ctx.AppName))
+	}
+
+	zap.L().Info(fmt.Sprintf("shutting down - ApplicationContext closed %s", ctx.AppName))
 }

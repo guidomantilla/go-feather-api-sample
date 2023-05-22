@@ -6,7 +6,6 @@ import (
 	"syscall"
 
 	"github.com/gin-gonic/gin"
-	feather_sql_config "github.com/guidomantilla/go-feather-sql/pkg/config"
 	feather_web_rest "github.com/guidomantilla/go-feather-web/pkg/rest"
 	feather_web_server "github.com/guidomantilla/go-feather-web/pkg/server"
 	"github.com/qmdx00/lifecycle"
@@ -41,7 +40,7 @@ func Init(appName string, version string, args []string, builder *BeanBuilder, f
 	)
 
 	ctx := NewApplicationContext(strings.Join([]string{appName, version}, " - "), args, builder)
-	app.Cleanup(feather_sql_config.Stop)
+	defer ctx.Stop()
 
 	ctx.Router.POST("/login", ctx.AuthenticationEndpoint.Authenticate)
 	ctx.Router.GET("/health", func(ctx *gin.Context) {

@@ -15,7 +15,7 @@ import (
 
 func ExecuteCmdFn(_ *cobra.Command, args []string) {
 
-	appName := "go-feather-api-sample"
+	appName, version := "go-feather-api-sample", "v0.0.1"
 	builder := boot.NewBeanBuilder()
 
 	builder.AuthenticationDelegate = func() feather_security.AuthenticationService {
@@ -28,7 +28,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		return nil
 	}
 
-	err := boot.Init(appName, "1.0", args, builder, func(ctx boot.ApplicationContext) {
+	err := boot.Init(appName, version, args, builder, func(ctx boot.ApplicationContext) {
 
 		root := &feather_security.Principal{
 			Username:           feather_commons_util.ValueToPtr("raven"),
