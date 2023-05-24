@@ -52,8 +52,6 @@ github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
 github.com/guidomantilla/go-feather-commons v0.3.0 h1:qTDQZkk/1syska2fsLoDEaVI/clWvmVGCOISoDTOaBI=
 github.com/guidomantilla/go-feather-commons v0.3.0/go.mod h1:Y8M/6av7e6MfKxHFWv7bBGZSZxdN9EaXN824hRkOlgc=
-github.com/guidomantilla/go-feather-security v0.3.0 h1:kbXQboxZBRJ8e/SNOUujR5Ec1/b23NxJYRxM2iJiang=
-github.com/guidomantilla/go-feather-security v0.3.0/go.mod h1:PzC4T5YuaYhgtptHrn/9xDCl0xiI33V4ExMsb1B0dxQ=
 github.com/guidomantilla/go-feather-sql v0.3.0 h1:QGMqbqgchJZR5LntlHJcm5c64VfM56fAkTspVP1nQ10=
 github.com/guidomantilla/go-feather-sql v0.3.0/go.mod h1:vg4CYYwxBl9SQdf99DqfKkvX37y70mo8W8TdtetGyss=
 github.com/guidomantilla/go-feather-web v0.3.0 h1:KuzrYvJGOr8OoBf12kNDM+4+sEbFcli+SCmOWjMrxeM=

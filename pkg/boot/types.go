@@ -47,13 +47,9 @@ type PrincipalManagerBuilderFunc func(passwordManager feather_security.PasswordM
 
 type TokenManagerBuilderFunc func(secret string) feather_security.TokenManager
 
-type AuthenticationDelegateBuilderFunc func() feather_security.AuthenticationService
+type AuthenticationServiceBuilderFunc func(passwordEncoder feather_security.PasswordEncoder, principalManager feather_security.PrincipalManager, tokenManager feather_security.TokenManager) feather_security.AuthenticationService
 
-type AuthenticationServiceBuilderFunc func(tokenManager feather_security.TokenManager, authenticationDelegate feather_security.AuthenticationService) feather_security.AuthenticationService
-
-type AuthorizationDelegateBuilderFunc func() feather_security.AuthorizationDelegate
-
-type AuthorizationServiceBuilderFunc func(tokenManager feather_security.TokenManager, authorizationDelegate feather_security.AuthorizationDelegate) feather_security.AuthorizationService
+type AuthorizationServiceBuilderFunc func(tokenManager feather_security.TokenManager, principalManager feather_security.PrincipalManager) feather_security.AuthorizationService
 
 type AuthenticationEndpointBuilderFunc func(authenticationService feather_security.AuthenticationService) feather_security.AuthenticationEndpoint
 
@@ -65,9 +61,7 @@ type BeanBuilder struct {
 	PasswordGenerator           PasswordGeneratorBuilderFunc
 	PrincipalManager            PrincipalManagerBuilderFunc
 	TokenManager                TokenManagerBuilderFunc
-	AuthenticationDelegate      AuthenticationDelegateBuilderFunc
 	AuthenticationService       AuthenticationServiceBuilderFunc
-	AuthorizationDelegate       AuthorizationDelegateBuilderFunc
 	AuthorizationService        AuthorizationServiceBuilderFunc
 	AuthenticationEndpoint      AuthenticationEndpointBuilderFunc
 	AuthorizationFilter         AuthorizationFilterBuilderFunc
@@ -90,16 +84,10 @@ func NewBeanBuilder() *BeanBuilder {
 		TokenManager: func(secret string) feather_security.TokenManager {
 			return nil
 		},
-		AuthenticationDelegate: func() feather_security.AuthenticationService {
+		AuthenticationService: func(passwordEncoder feather_security.PasswordEncoder, principalManager feather_security.PrincipalManager, tokenManager feather_security.TokenManager) feather_security.AuthenticationService {
 			return nil
 		},
-		AuthenticationService: func(tokenManager feather_security.TokenManager, authenticationDelegate feather_security.AuthenticationService) feather_security.AuthenticationService {
-			return nil
-		},
-		AuthorizationDelegate: func() feather_security.AuthorizationDelegate {
-			return nil
-		},
-		AuthorizationService: func(tokenManager feather_security.TokenManager, authorizationDelegate feather_security.AuthorizationDelegate) feather_security.AuthorizationService {
+		AuthorizationService: func(tokenManager feather_security.TokenManager, principalManager feather_security.PrincipalManager) feather_security.AuthorizationService {
 			return nil
 		},
 		AuthenticationEndpoint: func(authenticationService feather_security.AuthenticationService) feather_security.AuthenticationEndpoint {
@@ -120,10 +108,8 @@ type ApplicationContext struct {
 	PasswordGenerator           feather_security.PasswordGenerator
 	PrincipalManager            feather_security.PrincipalManager
 	TokenManager                feather_security.TokenManager
-	AuthenticationDelegate      feather_security.AuthenticationService
 	AuthenticationService       feather_security.AuthenticationService
 	AuthenticationEndpoint      feather_security.AuthenticationEndpoint
-	AuthorizationDelegate       feather_security.AuthorizationDelegate
 	AuthorizationService        feather_security.AuthorizationService
 	AuthorizationFilter         feather_security.AuthorizationFilter
 	Router                      *gin.Engine
@@ -237,21 +223,15 @@ func buildSecurity(ctx *ApplicationContext, builder *BeanBuilder) {
 		ctx.TokenManager = feather_security.NewJwtTokenManager([]byte(secret), feather_security.WithIssuer(ctx.AppName))
 	}
 
-	if ctx.AuthenticationDelegate = builder.AuthenticationDelegate(); ctx.AuthenticationDelegate == nil {
-		ctx.AuthenticationDelegate = feather_security.NewDefaultAuthenticationDelegate(passwordManager, ctx.PrincipalManager)
-	}
-	if ctx.AuthenticationService = builder.AuthenticationService(ctx.TokenManager, ctx.AuthenticationDelegate); ctx.AuthenticationService == nil {
-		ctx.AuthenticationService = feather_security.NewDefaultAuthenticationService(ctx.TokenManager, ctx.AuthenticationDelegate)
+	if ctx.AuthenticationService = builder.AuthenticationService(passwordManager, ctx.PrincipalManager, ctx.TokenManager); ctx.AuthenticationService == nil {
+		ctx.AuthenticationService = feather_security.NewDefaultAuthenticationService(passwordManager, ctx.PrincipalManager, ctx.TokenManager)
 	}
 	if ctx.AuthenticationEndpoint = builder.AuthenticationEndpoint(ctx.AuthenticationService); ctx.AuthenticationEndpoint == nil {
 		ctx.AuthenticationEndpoint = feather_security.NewDefaultAuthenticationEndpoint(ctx.AuthenticationService)
 	}
 
-	if ctx.AuthorizationDelegate = builder.AuthorizationDelegate(); ctx.AuthorizationDelegate == nil {
-		ctx.AuthorizationDelegate = feather_security.NewDefaultAuthorizationDelegate(ctx.PrincipalManager)
-	}
-	if ctx.AuthorizationService = builder.AuthorizationService(ctx.TokenManager, ctx.AuthorizationDelegate); ctx.AuthorizationService == nil {
-		ctx.AuthorizationService = feather_security.NewDefaultAuthorizationService(ctx.TokenManager, ctx.AuthorizationDelegate)
+	if ctx.AuthorizationService = builder.AuthorizationService(ctx.TokenManager, ctx.PrincipalManager); ctx.AuthorizationService == nil {
+		ctx.AuthorizationService = feather_security.NewDefaultAuthorizationService(ctx.TokenManager, ctx.PrincipalManager)
 	}
 	if ctx.AuthorizationFilter = builder.AuthorizationFilter(ctx.AuthorizationService); ctx.AuthorizationFilter == nil {
 		ctx.AuthorizationFilter = feather_security.NewDefaultAuthorizationFilter(ctx.AuthorizationService)
