@@ -33,3 +33,12 @@ exception
             raise;
         end if;
 end;
+
+begin
+    execute immediate 'drop view auth_principals cascade constraints';
+exception
+    when others then
+        if sqlcode != -942 then
+            raise;
+        end if;
+end;

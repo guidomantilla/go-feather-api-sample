@@ -61,7 +61,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/guidomantilla/go-feather-security => ../go-feather-security
+replace (
+	github.com/guidomantilla/go-feather-security => ../go-feather-security
+	github.com/guidomantilla/go-feather-sql => ../go-feather-sql
+)
 
 //replace (
 //	github.com/guidomantilla/go-feather-commons => ../go-feather-commons
