@@ -23,7 +23,6 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 	builder.PrincipalManager = func(appCtx *boot.ApplicationContext) feather_security.PrincipalManager {
 		return service.NewDBPrincipalManager(appCtx.TransactionHandler, authPrincipalRepository)
 	}
-
 	err := boot.Init(appName, version, args, builder, func(appCtx boot.ApplicationContext) {
 
 		appCtx.SecureRouter.GET("/info", func(ctx *gin.Context) {
