@@ -1,12 +1,13 @@
 package serve
 
 import (
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 
 	"github.com/guidomantilla/go-feather-api-sample/internal/repositories"
 	"github.com/guidomantilla/go-feather-api-sample/internal/service"
@@ -30,6 +31,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		})
 	})
 	if err != nil {
-		zap.L().Fatal(err.Error())
+		slog.Error(err.Error())
+		os.Exit(1)
 	}
 }

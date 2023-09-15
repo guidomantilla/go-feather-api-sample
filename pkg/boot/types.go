@@ -3,6 +3,7 @@ package boot
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -13,12 +14,11 @@ import (
 	feather_sql_datasource "github.com/guidomantilla/go-feather-sql/pkg/datasource"
 	feather_sql "github.com/guidomantilla/go-feather-sql/pkg/sql"
 	feather_sql_transaction "github.com/guidomantilla/go-feather-sql/pkg/transaction"
-	"go.uber.org/zap"
 )
 
 const (
 	OsPropertySourceName  = "OS_PROPERTY_SOURCE_NAME"
-	CmdPropertySourceName = "CMD_PROPERTY_SOURCE_NAME"
+	CmdPropertySourceName = "CMD_PROPERTY_SOURCE_NAME" //nolint:gosec
 	HostPort              = "HOST_PORT"
 	TokenSignatureKey     = "TOKEN_SIGNATURE_KEY"
 	ParamHolder           = "PARAM_HOLDER"
@@ -96,38 +96,45 @@ func NewBeanBuilder() *BeanBuilder {
 			paramHolderName := appCtx.Environment.GetValueOrDefault(ParamHolder, EnvVarDefaultValuesMap[ParamHolder]).AsString()
 			var paramHolder feather_sql.ParamHolder
 			if paramHolder = feather_sql.UndefinedParamHolder.ValueFromName(paramHolderName); paramHolder == feather_sql.UndefinedParamHolder {
-				zap.L().Fatal("starting up - error setting up DB config: invalid param holder")
+				slog.Error("starting up - error setting up DB config: invalid param holder")
+				os.Exit(1)
 			}
 
 			driverName := appCtx.Environment.GetValue(DatasourceDriver).AsString()
 			var driver feather_sql.DriverName
 			if driver = feather_sql.UndefinedDriverName.ValueFromName(driverName); driver == feather_sql.UndefinedDriverName {
-				zap.L().Fatal("starting up - error setting up DB config: invalid driver name")
+				slog.Error("starting up - error setting up DB config: invalid driver name")
+				os.Exit(1)
 			}
 
 			var url string
 			if url = appCtx.Environment.GetValue(DatasourceUrl).AsString(); strings.TrimSpace(url) == "" {
-				zap.L().Fatal("starting up - error setting up DB config: url is empty")
+				slog.Error("starting up - error setting up DB config: url is empty")
+				os.Exit(1)
 			}
 
 			var username string
 			if username = appCtx.Environment.GetValue(DatasourceUsername).AsString(); strings.TrimSpace(username) == "" {
-				zap.L().Fatal("starting up - error setting up DB config: username is empty")
+				slog.Error("starting up - error setting up DB config: username is empty")
+				os.Exit(1)
 			}
 
 			var password string
 			if password = appCtx.Environment.GetValue(DatasourcePassword).AsString(); strings.TrimSpace(password) == "" {
-				zap.L().Fatal("starting up - error setting up DB config: password is empty")
+				slog.Error("starting up - error setting up DB config: password is empty")
+				os.Exit(1)
 			}
 
 			var server string
 			if server = appCtx.Environment.GetValue(DatasourceServer).AsString(); strings.TrimSpace(server) == "" {
-				zap.L().Fatal("starting up - error setting up DB config: server is empty")
+				slog.Error("starting up - error setting up DB config: server is empty")
+				os.Exit(1)
 			}
 
 			var service string
 			if service = appCtx.Environment.GetValue(DatasourceService).AsString(); strings.TrimSpace(service) == "" {
-				zap.L().Fatal("starting up - error setting up DB config: service is empty")
+				slog.Error("starting up - error setting up DB config: service is empty")
+				os.Exit(1)
 			}
 
 			return feather_sql_datasource.NewDefaultDatasourceContext(driver, paramHolder, url, username, password, server, service)
@@ -201,31 +208,34 @@ type ApplicationContext struct {
 func NewApplicationContext(appName string, args []string, builder *BeanBuilder) *ApplicationContext {
 
 	if appName == "" {
-		zap.L().Fatal("starting up - error setting up the ApplicationContext: appName is empty")
+		slog.Error("starting up - error setting up the ApplicationContext: appName is empty")
+		os.Exit(1)
 	}
 
-	zap.L().Info(fmt.Sprintf("starting up - starting up ApplicationContext %s", appName))
+	slog.Info(fmt.Sprintf("starting up - starting up ApplicationContext %s", appName))
 
 	if args == nil {
-		zap.L().Fatal("starting up - error setting up the ApplicationContext: args is nil")
+		slog.Error("starting up - error setting up the ApplicationContext: args is nil")
+		os.Exit(1)
 	}
 
 	if builder == nil {
-		zap.L().Fatal("starting up - error setting up the ApplicationContext: builder is nil")
+		slog.Error("starting up - error setting up the ApplicationContext: builder is nil")
+		os.Exit(1)
 	}
 
 	ctx := &ApplicationContext{}
 	ctx.AppName, ctx.CmdArgs = appName, args
 
-	zap.L().Info("starting up - setting up environment variables")
+	slog.Info("starting up - setting up environment variables")
 	ctx.Environment = builder.Environment(ctx)
 
-	zap.L().Info("starting up - setting up DB connection")
+	slog.Info("starting up - setting up DB connection")
 	ctx.DatasourceContext = builder.DatasourceContext(ctx)
 	ctx.Datasource = builder.Datasource(ctx)
 	ctx.TransactionHandler = builder.TransactionHandler(ctx)
 
-	zap.L().Info("starting up - setting up security")
+	slog.Info("starting up - setting up security")
 	ctx.PasswordEncoder = builder.PasswordEncoder(ctx)
 	ctx.PasswordGenerator = builder.PasswordGenerator(ctx)
 	ctx.PasswordManager = builder.PasswordManager(ctx)
@@ -245,20 +255,20 @@ func (ctx *ApplicationContext) Stop() {
 	if ctx.Datasource != nil && ctx.DatasourceContext != nil {
 
 		var database *sql.DB
-		zap.L().Info("shutting down - closing up db connection")
+		slog.Info("shutting down - closing up db connection")
 
 		if database, err = ctx.Datasource.GetDatabase(); err != nil {
-			zap.L().Error(fmt.Sprintf("shutting down - error db connection: %s", err.Error()))
+			slog.Error(fmt.Sprintf("shutting down - error db connection: %s", err.Error()))
 			return
 		}
 
 		if err = database.Close(); err != nil {
-			zap.L().Error(fmt.Sprintf("shutting down - error closing db connection: %s", err.Error()))
+			slog.Error(fmt.Sprintf("shutting down - error closing db connection: %s", err.Error()))
 			return
 		}
 
-		zap.L().Info("shutting down - db connection closed")
+		slog.Info("shutting down - db connection closed")
 	}
 
-	zap.L().Info(fmt.Sprintf("shutting down - ApplicationContext closed %s", ctx.AppName))
+	slog.Info(fmt.Sprintf("shutting down - ApplicationContext closed %s", ctx.AppName))
 }

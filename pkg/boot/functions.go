@@ -1,7 +1,9 @@
 package boot
 
 import (
+	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 	"syscall"
 
@@ -9,28 +11,28 @@ import (
 	feather_web_rest "github.com/guidomantilla/go-feather-web/pkg/rest"
 	feather_web_server "github.com/guidomantilla/go-feather-web/pkg/server"
 	"github.com/qmdx00/lifecycle"
-	"go.uber.org/zap"
 )
 
 func Init(appName string, version string, args []string, builder *BeanBuilder, fn func(ctx ApplicationContext)) error {
 
-	logger, _ := zap.NewDevelopment()
-	zap.ReplaceGlobals(logger)
-
 	if appName == "" {
-		zap.L().Fatal("starting up - error setting up the application: appName is empty")
+		slog.Error("starting up - error setting up the application: appName is empty")
+		os.Exit(1)
 	}
 
 	if args == nil {
-		zap.L().Fatal("starting up - error setting up the application: args is nil")
+		slog.Error("starting up - error setting up the application: args is nil")
+		os.Exit(1)
 	}
 
 	if builder == nil {
-		zap.L().Fatal("starting up - error setting up the application: builder is nil")
+		slog.Error("starting up - error setting up the application: builder is nil")
+		os.Exit(1)
 	}
 
 	if fn == nil {
-		zap.L().Fatal("starting up - error setting up the application: fn is nil")
+		slog.Error("starting up - error setting up the application: fn is nil")
+		os.Exit(1)
 	}
 
 	app := lifecycle.NewApp(

@@ -6,16 +6,15 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang/mock v1.6.0
-	github.com/guidomantilla/go-feather-commons v0.5.0
-	github.com/guidomantilla/go-feather-security v0.5.0
-	github.com/guidomantilla/go-feather-sql v0.5.0
-	github.com/guidomantilla/go-feather-web v0.5.0
+	github.com/guidomantilla/go-feather-commons v0.5.1
+	github.com/guidomantilla/go-feather-security v0.5.1
+	github.com/guidomantilla/go-feather-sql v0.5.1
+	github.com/guidomantilla/go-feather-web v0.5.1
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/qmdx00/lifecycle v1.1.1
 	github.com/sijms/go-ora/v2 v2.7.17
 	github.com/spf13/cobra v1.7.0
 	go.uber.org/multierr v1.11.0
-	go.uber.org/zap v1.26.0
 )
 
 require (
@@ -40,6 +39,7 @@ require (
 	github.com/jackc/pgtype v1.14.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
