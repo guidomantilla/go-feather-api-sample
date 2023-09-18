@@ -11,6 +11,7 @@ import (
 	feather_commons_config "github.com/guidomantilla/go-feather-commons/pkg/config"
 	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
 	feather_sql "github.com/guidomantilla/go-feather-sql/pkg/sql"
+	feather_web_rest "github.com/guidomantilla/go-feather-web/pkg/rest"
 	"github.com/spf13/cobra"
 
 	"github.com/guidomantilla/go-feather-api-sample/pkg/config"
@@ -55,11 +56,33 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 	builder.PrincipalManager = func(appCtx *feather_boot.ApplicationContext) feather_security.PrincipalManager {
 		return service.NewDBPrincipalManager(appCtx.TransactionHandler, authPrincipalRepository)
 	}
-	err := feather_boot.Init(appName, version, args, builder, func(appCtx feather_boot.ApplicationContext) {
+	err := feather_boot.Init(appName, version, args, builder, func(appCtx feather_boot.ApplicationContext) error {
 
-		appCtx.SecureRouter.GET("/info", func(ctx *gin.Context) {
-			ctx.JSON(http.StatusOK, gin.H{"appName": appName})
+		appCtx.PrivateRouter.GET("/principal", func(ctx *gin.Context) {
+
+			var principal any
+			var exists bool
+			if principal, exists = ctx.Get("principal"); !exists {
+				ex := feather_web_rest.NotFoundException("principal not found in context")
+				ctx.AbortWithStatusJSON(ex.Code, ex)
+				return
+			}
+
+			username := principal.(*feather_security.Principal).Username
+
+			var err error
+			var user *feather_security.Principal
+			if user, err = appCtx.PrincipalManager.Find(ctx.Request.Context(), *username); err != nil {
+				ex := feather_web_rest.UnauthorizedException(err.Error())
+				ctx.AbortWithStatusJSON(ex.Code, ex)
+				return
+			}
+
+			user.Password, user.Passphrase = nil, nil
+			ctx.JSON(http.StatusOK, user)
 		})
+
+		return nil
 	})
 	if err != nil {
 		slog.Error(err.Error())

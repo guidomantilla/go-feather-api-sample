@@ -1,0 +1,23 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+option go_package = "./pkg/endpoint/rpc";
+
+message Exception {
+  uint32 code = 1;
+  string message = 2;
+  repeated string error = 3;
+}
+
+message Principal {
+  string id = 1;
+  string name = 2;
+}
+
+message GetPrincipalResponse {
+  Principal principal = 1;
+  Exception exception = 2;
+}
+
+service ApiSample {
+  rpc GetPrincipal(google.protobuf.Empty) returns (GetPrincipalResponse);
+}
