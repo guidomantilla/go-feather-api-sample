@@ -10,8 +10,8 @@ import (
 	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
 	feather_sql_transaction "github.com/guidomantilla/go-feather-sql/pkg/transaction"
 
-	"github.com/guidomantilla/go-feather-api-sample/internal/models"
-	"github.com/guidomantilla/go-feather-api-sample/internal/repositories"
+	"github.com/guidomantilla/go-feather-api-sample/pkg/models"
+	"github.com/guidomantilla/go-feather-api-sample/pkg/repositories"
 )
 
 type DBPrincipalManager struct {

@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 
-	"github.com/guidomantilla/go-feather-api-sample/internal/models"
+	"github.com/guidomantilla/go-feather-api-sample/pkg/models"
 )
 
 type AuthResourceRepository interface {

@@ -1,30 +1,61 @@
 package serve
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	feather_boot "github.com/guidomantilla/go-feather-boot/pkg/boot"
+	feather_commons_config "github.com/guidomantilla/go-feather-commons/pkg/config"
 	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
+	feather_sql "github.com/guidomantilla/go-feather-sql/pkg/sql"
 	"github.com/spf13/cobra"
 
-	"github.com/guidomantilla/go-feather-api-sample/internal/repositories"
-	"github.com/guidomantilla/go-feather-api-sample/internal/service"
-	"github.com/guidomantilla/go-feather-api-sample/pkg/boot"
+	"github.com/guidomantilla/go-feather-api-sample/pkg/config"
+	"github.com/guidomantilla/go-feather-api-sample/pkg/repositories"
+	"github.com/guidomantilla/go-feather-api-sample/pkg/service"
 )
 
 func ExecuteCmdFn(_ *cobra.Command, args []string) {
 
+	ctx := context.Background()
 	appName, version := "go-feather-api-sample", "v0.3.0"
 
 	authPrincipalRepository := repositories.NewDefaultAuthPrincipalRepository()
 
-	builder := boot.NewBeanBuilder()
-	builder.PrincipalManager = func(appCtx *boot.ApplicationContext) feather_security.PrincipalManager {
+	builder := feather_boot.NewBeanBuilder(ctx)
+	builder.Config = func(appCtx *feather_boot.ApplicationContext) {
+		var cfg config.Config
+		if err := feather_commons_config.Process(ctx, appCtx.Environment, &cfg); err != nil {
+			slog.Error("starting up - error setting up configuration.", "message", err.Error())
+			os.Exit(1)
+		}
+
+		appCtx.HttpConfig = &feather_boot.HttpConfig{
+			Host: cfg.Host,
+			Port: cfg.Port,
+		}
+
+		appCtx.SecurityConfig = &feather_boot.SecurityConfig{
+			TokenSignatureKey: cfg.TokenSignatureKey,
+		}
+
+		appCtx.DatabaseConfig = &feather_boot.DatabaseConfig{
+			ParamHolder:        feather_sql.UndefinedParamHolder.ValueFromName(*cfg.ParamHolder),
+			Driver:             feather_sql.UndefinedDriverName.ValueFromName(*cfg.DatasourceDriver),
+			DatasourceUrl:      cfg.DatasourceUrl,
+			DatasourceServer:   cfg.DatasourceServer,
+			DatasourceService:  cfg.DatasourceService,
+			DatasourceUsername: cfg.DatasourceUsername,
+			DatasourcePassword: cfg.DatasourcePassword,
+		}
+	}
+	builder.PrincipalManager = func(appCtx *feather_boot.ApplicationContext) feather_security.PrincipalManager {
 		return service.NewDBPrincipalManager(appCtx.TransactionHandler, authPrincipalRepository)
 	}
-	err := boot.Init(appName, version, args, builder, func(appCtx boot.ApplicationContext) {
+	err := feather_boot.Init(appName, version, args, builder, func(appCtx feather_boot.ApplicationContext) {
 
 		appCtx.SecureRouter.GET("/info", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, gin.H{"appName": appName})

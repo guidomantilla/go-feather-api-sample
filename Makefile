@@ -8,20 +8,19 @@ generate:
 
 sort-import:
 	goimports-reviser -rm-unused -set-alias -format -recursive cmd
-	goimports-reviser -rm-unused -set-alias -format -recursive internal
 	goimports-reviser -rm-unused -set-alias -format -recursive pkg
 
 format:
 	go fmt ./...
 
 vet:
-	go vet ./cmd/... ./internal/... ./pkg/...
+	go vet ./cmd/... ./pkg/...
 
 lint:
-	golangci-lint run ./cmd/... ./internal/... ./pkg/...
+	golangci-lint run ./cmd/... ./pkg/...
 
 test:
-	go test -covermode count -coverprofile coverage.out.tmp.01 ./internal/... ./pkg/...
+	go test -covermode count -coverprofile coverage.out.tmp.01 ./pkg/...
 	cat coverage.out.tmp.01 | grep -v "mocks.go" > coverage.out
 
 coverage: test
@@ -37,7 +36,8 @@ update-dependencies:
 	go mod tidy
 
 prepare:
-	go install -v github.com/incu6us/goimports-reviser/v3@latest
+	go install github.com/kisielk/godepgraph@latest
+	go install github.com/incu6us/goimports-reviser/v3@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	go install github.com/golang/mock/mockgen@latest
 	go install github.com/cweill/gotests/gotests@latest

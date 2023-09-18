@@ -7,7 +7,7 @@ import (
 
 	feather_sql_dao "github.com/guidomantilla/go-feather-sql/pkg/dao"
 
-	"github.com/guidomantilla/go-feather-api-sample/internal/models"
+	"github.com/guidomantilla/go-feather-api-sample/pkg/models"
 )
 
 type DefaultAuthPrincipalRepository struct {
