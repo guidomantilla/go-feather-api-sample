@@ -2,7 +2,8 @@ package config
 
 type Config struct {
 	Host               *string `env:"HOST,default=localhost"`
-	Port               *string `env:"PORT,default=8080"`
+	HttpPort           *string `env:"HTTP_PORT,default=8080"`
+	GrpcPort           *string `env:"GRPC_PORT,default=50051"`
 	TokenSignatureKey  *string `env:"TOKEN_SIGNATURE_KEY,default=SecretYouShouldHide"`
 	ParamHolder        *string `env:"PARAM_HOLDER,default=named"`
 	DatasourceDriver   *string `env:"DATASOURCE_DRIVER,required"`

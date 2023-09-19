@@ -5,12 +5,21 @@ option go_package = "./pkg/endpoint/rpc";
 message Exception {
   uint32 code = 1;
   string message = 2;
-  repeated string error = 3;
+  repeated string errors = 3;
 }
 
 message Principal {
-  string id = 1;
-  string name = 2;
+  string username = 1;
+  string role = 2;
+  string password = 3;
+  string passphrase = 4;
+  bool enabled = 5;
+  bool non_locked = 6;
+  bool non_expired = 7;
+  bool password_non_expired = 8;
+  bool signup_done = 9;
+  repeated string resources = 10;
+  string token = 11;
 }
 
 message GetPrincipalResponse {
@@ -19,5 +28,6 @@ message GetPrincipalResponse {
 }
 
 service ApiSample {
+  rpc Login(Principal) returns (GetPrincipalResponse);
   rpc GetPrincipal(google.protobuf.Empty) returns (GetPrincipalResponse);
 }

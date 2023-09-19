@@ -13,8 +13,10 @@ import (
 	feather_sql "github.com/guidomantilla/go-feather-sql/pkg/sql"
 	feather_web_rest "github.com/guidomantilla/go-feather-web/pkg/rest"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
 
 	"github.com/guidomantilla/go-feather-api-sample/pkg/config"
+	"github.com/guidomantilla/go-feather-api-sample/pkg/endpoint/rpc"
 	"github.com/guidomantilla/go-feather-api-sample/pkg/repositories"
 	"github.com/guidomantilla/go-feather-api-sample/pkg/service"
 )
@@ -36,7 +38,12 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 
 		appCtx.HttpConfig = &feather_boot.HttpConfig{
 			Host: cfg.Host,
-			Port: cfg.Port,
+			Port: cfg.HttpPort,
+		}
+
+		appCtx.GrpcConfig = &feather_boot.GrpcConfig{
+			Host: cfg.Host,
+			Port: cfg.GrpcPort,
 		}
 
 		appCtx.SecurityConfig = &feather_boot.SecurityConfig{
@@ -55,6 +62,10 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 	}
 	builder.PrincipalManager = func(appCtx *feather_boot.ApplicationContext) feather_security.PrincipalManager {
 		return service.NewDBPrincipalManager(appCtx.TransactionHandler, authPrincipalRepository)
+	}
+	builder.GrpcServer = func(appCtx *feather_boot.ApplicationContext) (*grpc.ServiceDesc, any) {
+		grpcServer := rpc.NewApiSampleGrpcServer(appCtx.AuthenticationService, appCtx.AuthorizationService, appCtx.PrincipalManager)
+		return &rpc.ApiSample_ServiceDesc, grpcServer
 	}
 	err := feather_boot.Init(appName, version, args, builder, func(appCtx feather_boot.ApplicationContext) error {
 
