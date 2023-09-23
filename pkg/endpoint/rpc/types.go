@@ -29,34 +29,13 @@ func NewApiSampleGrpcServer(authenticationService feather_security.Authenticatio
 func (server *ApiSampleGrpcServer) Login(ctx context.Context, request *Principal) (*GetPrincipalResponse, error) {
 
 	principal := &feather_security.Principal{
-		Username:           &request.Username,
-		Role:               &request.Role,
-		Password:           &request.Password,
-		Passphrase:         &request.Passphrase,
-		Enabled:            &request.Enabled,
-		NonLocked:          &request.NonLocked,
-		NonExpired:         &request.NonExpired,
-		PasswordNonExpired: &request.PasswordNonExpired,
-		SignUpDone:         &request.SignupDone,
-		Resources:          &request.Resources,
-		Token:              &request.Token,
+		Username: &request.Username,
+		Password: &request.Password,
 	}
 	var err error
-	/*
-		if errs := validate1(principal); errs != nil {
-			ex := feather_web_rest.BadRequestException("error validating the principal", errs...)
-			response := &GetPrincipalResponse{
-				Exception: &Exception{
-					Code:    uint32(ex.Code),
-					Message: ex.Message,
-					Errors:  ex.Errors,
-				},
-			}
-			return response, status.Errorf(codes.InvalidArgument, ex.Message)
-		}
-	*/
-	if err = server.authenticationService.Authenticate(ctx, principal); err != nil {
-		ex := feather_web_rest.UnauthorizedException(err.Error())
+
+	if errs := server.authenticationService.Validate(principal); errs != nil {
+		ex := feather_web_rest.BadRequestException("error validating the principal", errs...)
 		response := &GetPrincipalResponse{
 			Exception: &Exception{
 				Code:    uint32(ex.Code),
@@ -64,22 +43,27 @@ func (server *ApiSampleGrpcServer) Login(ctx context.Context, request *Principal
 				Errors:  ex.Errors,
 			},
 		}
-		return response, status.Errorf(codes.Unauthenticated, ex.Message)
+		return response, status.Errorf(codes.InvalidArgument, ex.Message)
+	}
+
+	if err = server.authenticationService.Authenticate(ctx, principal); err != nil {
+		ex := feather_web_rest.UnauthorizedException(err.Error())
+		errStatus := status.Newf(codes.Unauthenticated, ex.Message)
+		errStatus, _ = errStatus.WithDetails(&Exception{
+			Code:    uint32(ex.Code),
+			Message: ex.Message,
+			Errors:  ex.Errors,
+		})
+
+		return nil, errStatus.Err()
 	}
 
 	return &GetPrincipalResponse{
 		Principal: &Principal{
-			Username: *principal.Username,
-			Role:     *principal.Role,
-			//Password:           *principal.Password,
-			//Passphrase:         *principal.Passphrase,
-			Enabled:            *principal.Enabled,
-			NonLocked:          *principal.NonLocked,
-			NonExpired:         *principal.NonExpired,
-			PasswordNonExpired: *principal.PasswordNonExpired,
-			SignupDone:         *principal.SignUpDone,
-			Resources:          *principal.Resources,
-			Token:              *principal.Token,
+			Username:  *principal.Username,
+			Role:      *principal.Role,
+			Resources: *principal.Resources,
+			Token:     *principal.Token,
 		},
 	}, nil
 }

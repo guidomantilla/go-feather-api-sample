@@ -8,18 +8,18 @@ import (
 
 	feather_commons_util "github.com/guidomantilla/go-feather-commons/pkg/util"
 	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
-	feather_sql_transaction "github.com/guidomantilla/go-feather-sql/pkg/transaction"
+	feather_sql_datasource "github.com/guidomantilla/go-feather-sql/pkg/datasource"
 
 	"github.com/guidomantilla/go-feather-api-sample/pkg/models"
 	"github.com/guidomantilla/go-feather-api-sample/pkg/repositories"
 )
 
 type DBPrincipalManager struct {
-	transactionHandler      feather_sql_transaction.TransactionHandler
+	transactionHandler      feather_sql_datasource.TransactionHandler
 	authPrincipalRepository repositories.AuthPrincipalRepository
 }
 
-func NewDBPrincipalManager(transactionHandler feather_sql_transaction.TransactionHandler, authPrincipalRepository repositories.AuthPrincipalRepository) *DBPrincipalManager {
+func NewDBPrincipalManager(transactionHandler feather_sql_datasource.TransactionHandler, authPrincipalRepository repositories.AuthPrincipalRepository) *DBPrincipalManager {
 	return &DBPrincipalManager{
 		transactionHandler:      transactionHandler,
 		authPrincipalRepository: authPrincipalRepository,

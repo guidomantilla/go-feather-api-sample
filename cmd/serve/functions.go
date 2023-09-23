@@ -2,13 +2,12 @@ package serve
 
 import (
 	"context"
-	"log/slog"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	feather_boot "github.com/guidomantilla/go-feather-boot/pkg/boot"
 	feather_commons_config "github.com/guidomantilla/go-feather-commons/pkg/config"
+	feather_commons_log "github.com/guidomantilla/go-feather-commons/pkg/log"
 	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
 	feather_sql "github.com/guidomantilla/go-feather-sql/pkg/sql"
 	feather_web_rest "github.com/guidomantilla/go-feather-web/pkg/rest"
@@ -23,6 +22,7 @@ import (
 
 func ExecuteCmdFn(_ *cobra.Command, args []string) {
 
+	logger := feather_commons_log.CustomLogger()
 	ctx := context.Background()
 	appName, version := "go-feather-api-sample", "v0.3.0"
 
@@ -32,8 +32,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 	builder.Config = func(appCtx *feather_boot.ApplicationContext) {
 		var cfg config.Config
 		if err := feather_commons_config.Process(ctx, appCtx.Environment, &cfg); err != nil {
-			slog.Error("starting up - error setting up configuration.", "message", err.Error())
-			os.Exit(1)
+			feather_commons_log.Fatal("starting up - error setting up configuration.", "message", err.Error())
 		}
 
 		appCtx.HttpConfig = &feather_boot.HttpConfig{
@@ -67,7 +66,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		grpcServer := rpc.NewApiSampleGrpcServer(appCtx.AuthenticationService, appCtx.AuthorizationService, appCtx.PrincipalManager)
 		return &rpc.ApiSample_ServiceDesc, grpcServer
 	}
-	err := feather_boot.Init(appName, version, args, builder, func(appCtx feather_boot.ApplicationContext) error {
+	err := feather_boot.Init(appName, version, args, logger, builder, func(appCtx feather_boot.ApplicationContext) error {
 
 		appCtx.PrivateRouter.GET("/principal", func(ctx *gin.Context) {
 
@@ -96,7 +95,6 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		return nil
 	})
 	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
+		feather_commons_log.Fatal(err.Error())
 	}
 }
