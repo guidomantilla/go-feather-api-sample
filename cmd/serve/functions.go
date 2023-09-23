@@ -22,7 +22,7 @@ import (
 
 func ExecuteCmdFn(_ *cobra.Command, args []string) {
 
-	logger := feather_commons_log.CustomLogger()
+	logger := feather_commons_log.Custom()
 	ctx := context.Background()
 	appName, version := "go-feather-api-sample", "v0.3.0"
 
