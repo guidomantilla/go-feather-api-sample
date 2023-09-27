@@ -80,7 +80,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		appCtx.PrivateRouter.PUT("/roles/:id", authRoleEndpoint.Update)
 		appCtx.PrivateRouter.DELETE("/roles/:id", authRoleEndpoint.Delete)
 
-		authAclEndpoint := rest.NewDefaultAuthAclEndpoint()
+		authAclEndpoint := rest.NewDefaultAuthAccessControlListEndpoint()
 		appCtx.PrivateRouter.GET("/acls", authAclEndpoint.FindAll)
 		appCtx.PrivateRouter.GET("/acls/:id", authAclEndpoint.FindById)
 		appCtx.PrivateRouter.POST("/acls", authAclEndpoint.Create)

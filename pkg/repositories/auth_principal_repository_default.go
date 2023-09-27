@@ -10,10 +10,6 @@ import (
 	"github.com/guidomantilla/go-feather-api-sample/pkg/models"
 )
 
-var (
-	_ AuthPrincipalRepository = (*DefaultAuthPrincipalRepository)(nil)
-)
-
 type DefaultAuthPrincipalRepository struct {
 	statementFindByUsername   string
 	statementExistsByUsername string

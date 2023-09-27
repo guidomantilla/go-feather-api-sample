@@ -2,29 +2,29 @@ package rest
 
 import "github.com/gin-gonic/gin"
 
-type DefaultAuthAclEndpoint struct {
+type DefaultAuthAccessControlListEndpoint struct {
 }
 
-func NewDefaultAuthAclEndpoint() *DefaultAuthAclEndpoint {
-	return &DefaultAuthAclEndpoint{}
+func NewDefaultAuthAccessControlListEndpoint() *DefaultAuthAccessControlListEndpoint {
+	return &DefaultAuthAccessControlListEndpoint{}
 }
 
-func (endpoint *DefaultAuthAclEndpoint) Create(ctx *gin.Context) {
-
-}
-
-func (endpoint *DefaultAuthAclEndpoint) Update(ctx *gin.Context) {
+func (endpoint *DefaultAuthAccessControlListEndpoint) Create(ctx *gin.Context) {
 
 }
 
-func (endpoint *DefaultAuthAclEndpoint) Delete(ctx *gin.Context) {
+func (endpoint *DefaultAuthAccessControlListEndpoint) Update(ctx *gin.Context) {
 
 }
 
-func (endpoint *DefaultAuthAclEndpoint) FindById(ctx *gin.Context) {
+func (endpoint *DefaultAuthAccessControlListEndpoint) Delete(ctx *gin.Context) {
 
 }
 
-func (endpoint *DefaultAuthAclEndpoint) FindAll(ctx *gin.Context) {
+func (endpoint *DefaultAuthAccessControlListEndpoint) FindById(ctx *gin.Context) {
+
+}
+
+func (endpoint *DefaultAuthAccessControlListEndpoint) FindAll(ctx *gin.Context) {
 
 }

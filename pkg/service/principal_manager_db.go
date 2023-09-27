@@ -14,6 +14,10 @@ import (
 	"github.com/guidomantilla/go-feather-api-sample/pkg/repositories"
 )
 
+var (
+	_ feather_security.PrincipalManager = (*DBPrincipalManager)(nil)
+)
+
 type DBPrincipalManager struct {
 	transactionHandler      feather_sql_datasource.TransactionHandler
 	authPrincipalRepository repositories.AuthPrincipalRepository

@@ -6,6 +6,10 @@ import (
 	"github.com/guidomantilla/go-feather-api-sample/pkg/models"
 )
 
+var (
+	_ AuthPrincipalRepository = (*DefaultAuthPrincipalRepository)(nil)
+)
+
 type AuthResourceRepository interface {
 	Create(ctx context.Context, authResource *models.AuthResource) error
 	Update(ctx context.Context, authResource *models.AuthResource) error
