@@ -28,8 +28,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ApiSampleClient interface {
-	Login(ctx context.Context, in *Principal, opts ...grpc.CallOption) (*GetPrincipalResponse, error)
-	GetPrincipal(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetPrincipalResponse, error)
+	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	GetPrincipal(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Principal, error)
 }
 
 type apiSampleClient struct {
@@ -40,8 +40,8 @@ func NewApiSampleClient(cc grpc.ClientConnInterface) ApiSampleClient {
 	return &apiSampleClient{cc}
 }
 
-func (c *apiSampleClient) Login(ctx context.Context, in *Principal, opts ...grpc.CallOption) (*GetPrincipalResponse, error) {
-	out := new(GetPrincipalResponse)
+func (c *apiSampleClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	out := new(LoginResponse)
 	err := c.cc.Invoke(ctx, ApiSample_Login_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -49,8 +49,8 @@ func (c *apiSampleClient) Login(ctx context.Context, in *Principal, opts ...grpc
 	return out, nil
 }
 
-func (c *apiSampleClient) GetPrincipal(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetPrincipalResponse, error) {
-	out := new(GetPrincipalResponse)
+func (c *apiSampleClient) GetPrincipal(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Principal, error) {
+	out := new(Principal)
 	err := c.cc.Invoke(ctx, ApiSample_GetPrincipal_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -62,8 +62,8 @@ func (c *apiSampleClient) GetPrincipal(ctx context.Context, in *emptypb.Empty, o
 // All implementations must embed UnimplementedApiSampleServer
 // for forward compatibility
 type ApiSampleServer interface {
-	Login(context.Context, *Principal) (*GetPrincipalResponse, error)
-	GetPrincipal(context.Context, *emptypb.Empty) (*GetPrincipalResponse, error)
+	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	GetPrincipal(context.Context, *emptypb.Empty) (*Principal, error)
 	mustEmbedUnimplementedApiSampleServer()
 }
 
@@ -71,10 +71,10 @@ type ApiSampleServer interface {
 type UnimplementedApiSampleServer struct {
 }
 
-func (UnimplementedApiSampleServer) Login(context.Context, *Principal) (*GetPrincipalResponse, error) {
+func (UnimplementedApiSampleServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedApiSampleServer) GetPrincipal(context.Context, *emptypb.Empty) (*GetPrincipalResponse, error) {
+func (UnimplementedApiSampleServer) GetPrincipal(context.Context, *emptypb.Empty) (*Principal, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPrincipal not implemented")
 }
 func (UnimplementedApiSampleServer) mustEmbedUnimplementedApiSampleServer() {}
@@ -91,7 +91,7 @@ func RegisterApiSampleServer(s grpc.ServiceRegistrar, srv ApiSampleServer) {
 }
 
 func _ApiSample_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Principal)
+	in := new(LoginRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func _ApiSample_Login_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: ApiSample_Login_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiSampleServer).Login(ctx, req.(*Principal))
+		return srv.(ApiSampleServer).Login(ctx, req.(*LoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -12,6 +12,10 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+var (
+	_ ApiSampleServer = (*ApiSampleGrpcServer)(nil)
+)
+
 type ApiSampleGrpcServer struct {
 	authenticationService feather_security.AuthenticationService
 	authorizationService  feather_security.AuthorizationService
@@ -26,7 +30,7 @@ func NewApiSampleGrpcServer(authenticationService feather_security.Authenticatio
 	}
 }
 
-func (server *ApiSampleGrpcServer) Login(ctx context.Context, request *Principal) (*GetPrincipalResponse, error) {
+func (server *ApiSampleGrpcServer) Login(ctx context.Context, request *LoginRequest) (*LoginResponse, error) {
 
 	principal := &feather_security.Principal{
 		Username: &request.Username,
@@ -36,90 +40,46 @@ func (server *ApiSampleGrpcServer) Login(ctx context.Context, request *Principal
 
 	if errs := server.authenticationService.Validate(principal); errs != nil {
 		ex := feather_web_rest.BadRequestException("error validating the principal", errs...)
-		response := &GetPrincipalResponse{
-			Exception: &Exception{
-				Code:    uint32(ex.Code),
-				Message: ex.Message,
-				Errors:  ex.Errors,
-			},
-		}
-		return response, status.Errorf(codes.InvalidArgument, ex.Message)
+		return nil, status.Errorf(codes.InvalidArgument, ex.Message)
 	}
 
 	if err = server.authenticationService.Authenticate(ctx, principal); err != nil {
 		ex := feather_web_rest.UnauthorizedException(err.Error())
-		errStatus := status.Newf(codes.Unauthenticated, ex.Message)
-		errStatus, _ = errStatus.WithDetails(&Exception{
-			Code:    uint32(ex.Code),
-			Message: ex.Message,
-			Errors:  ex.Errors,
-		})
-
-		return nil, errStatus.Err()
+		return nil, status.Errorf(codes.Unauthenticated, ex.Message)
 	}
 
-	return &GetPrincipalResponse{
-		Principal: &Principal{
-			Username:  *principal.Username,
-			Role:      *principal.Role,
-			Resources: *principal.Resources,
-			Token:     *principal.Token,
-		},
+	return &LoginResponse{
+		Username:  *principal.Username,
+		Role:      *principal.Role,
+		Resources: *principal.Resources,
+		Token:     *principal.Token,
 	}, nil
 }
 
-func (server *ApiSampleGrpcServer) GetPrincipal(ctx context.Context, _ *emptypb.Empty) (*GetPrincipalResponse, error) {
+func (server *ApiSampleGrpcServer) GetPrincipal(ctx context.Context, _ *emptypb.Empty) (*Principal, error) {
 
 	var ok bool
 	var md metadata.MD
 	if md, ok = metadata.FromIncomingContext(ctx); !ok {
 		ex := feather_web_rest.UnauthorizedException("failed to get metadata")
-		response := &GetPrincipalResponse{
-			Exception: &Exception{
-				Code:    uint32(ex.Code),
-				Message: ex.Message,
-				Errors:  ex.Errors,
-			},
-		}
-		return response, status.Errorf(codes.Unauthenticated, ex.Message)
+		return nil, status.Errorf(codes.Unauthenticated, ex.Message)
 	}
 
 	bearer := md.Get("Authorization")
 	if len(bearer) == 0 {
 		ex := feather_web_rest.UnauthorizedException("invalid authorization header")
-		response := &GetPrincipalResponse{
-			Exception: &Exception{
-				Code:    uint32(ex.Code),
-				Message: ex.Message,
-				Errors:  ex.Errors,
-			},
-		}
-		return response, status.Errorf(codes.Unauthenticated, ex.Message)
+		return nil, status.Errorf(codes.Unauthenticated, ex.Message)
 	}
 
 	if !strings.HasPrefix(bearer[0], "Bearer ") {
 		ex := feather_web_rest.UnauthorizedException("invalid authorization header")
-		response := &GetPrincipalResponse{
-			Exception: &Exception{
-				Code:    uint32(ex.Code),
-				Message: ex.Message,
-				Errors:  ex.Errors,
-			},
-		}
-		return response, status.Errorf(codes.Unauthenticated, ex.Message)
+		return nil, status.Errorf(codes.Unauthenticated, ex.Message)
 	}
 
 	splits := strings.Split(bearer[0], " ")
 	if len(splits) != 2 {
 		ex := feather_web_rest.UnauthorizedException("invalid authorization header")
-		response := &GetPrincipalResponse{
-			Exception: &Exception{
-				Code:    uint32(ex.Code),
-				Message: ex.Message,
-				Errors:  ex.Errors,
-			},
-		}
-		return response, status.Errorf(codes.Unauthenticated, ex.Message)
+		return nil, status.Errorf(codes.Unauthenticated, ex.Message)
 	}
 
 	var err error
@@ -127,41 +87,25 @@ func (server *ApiSampleGrpcServer) GetPrincipal(ctx context.Context, _ *emptypb.
 	ctxWithResource := context.WithValue(ctx, feather_security.ResourceCtxKey{}, strings.Join([]string{"GET", "/principal"}, " "))
 	if principal, err = server.authorizationService.Authorize(ctxWithResource, splits[1]); err != nil {
 		ex := feather_web_rest.UnauthorizedException(err.Error())
-		response := &GetPrincipalResponse{
-			Exception: &Exception{
-				Code:    uint32(ex.Code),
-				Message: ex.Message,
-				Errors:  ex.Errors,
-			},
-		}
-		return response, status.Errorf(codes.Unauthenticated, ex.Message)
+		return nil, status.Errorf(codes.Unauthenticated, ex.Message)
 	}
 
 	if principal, err = server.principalManager.Find(ctx, *principal.Username); err != nil {
 		ex := feather_web_rest.InternalServerErrorException(err.Error())
-		response := &GetPrincipalResponse{
-			Exception: &Exception{
-				Code:    uint32(ex.Code),
-				Message: ex.Message,
-				Errors:  ex.Errors,
-			},
-		}
-		return response, status.Errorf(codes.Internal, ex.Message)
+		return nil, status.Errorf(codes.Internal, ex.Message)
 	}
-	return &GetPrincipalResponse{
-		Principal: &Principal{
-			Username:           *principal.Username,
-			Role:               *principal.Role,
-			Password:           *principal.Password,
-			Passphrase:         *principal.Passphrase,
-			Enabled:            *principal.Enabled,
-			NonLocked:          *principal.NonLocked,
-			NonExpired:         *principal.NonExpired,
-			PasswordNonExpired: *principal.PasswordNonExpired,
-			SignupDone:         *principal.SignUpDone,
-			Resources:          *principal.Resources,
-			Token:              *principal.Token,
-		},
+	return &Principal{
+		Username:           *principal.Username,
+		Role:               *principal.Role,
+		Password:           *principal.Password,
+		Passphrase:         *principal.Passphrase,
+		Enabled:            *principal.Enabled,
+		NonLocked:          *principal.NonLocked,
+		NonExpired:         *principal.NonExpired,
+		PasswordNonExpired: *principal.PasswordNonExpired,
+		SignupDone:         *principal.SignUpDone,
+		Resources:          *principal.Resources,
+		Token:              *principal.Token,
 	}, nil
 }
 
