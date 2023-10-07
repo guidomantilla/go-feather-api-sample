@@ -75,7 +75,7 @@ func (manager *DBPrincipalManager) Find(ctx context.Context, username string) (*
 			NonExpired:         feather_commons_util.ValueToPtr(true),
 			PasswordNonExpired: feather_commons_util.ValueToPtr(true),
 			SignUpDone:         feather_commons_util.ValueToPtr(true),
-			Resources:          &resources,
+			Resources:          resources,
 		}
 
 		return nil
@@ -109,7 +109,7 @@ func (manager *DBPrincipalManager) VerifyResource(ctx context.Context, username 
 		return err
 	}
 
-	for _, rsrc := range *principal.Resources {
+	for _, rsrc := range principal.Resources {
 		if resource == rsrc {
 			return nil
 		}

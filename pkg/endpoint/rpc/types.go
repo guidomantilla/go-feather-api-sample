@@ -51,7 +51,7 @@ func (server *ApiSampleGrpcServer) Login(ctx context.Context, request *LoginRequ
 	return &LoginResponse{
 		Username:  *principal.Username,
 		Role:      *principal.Role,
-		Resources: *principal.Resources,
+		Resources: principal.Resources,
 		Token:     *principal.Token,
 	}, nil
 }
@@ -104,7 +104,7 @@ func (server *ApiSampleGrpcServer) GetPrincipal(ctx context.Context, _ *emptypb.
 		NonExpired:         *principal.NonExpired,
 		PasswordNonExpired: *principal.PasswordNonExpired,
 		SignupDone:         *principal.SignUpDone,
-		Resources:          *principal.Resources,
+		Resources:          principal.Resources,
 		Token:              *principal.Token,
 	}, nil
 }
