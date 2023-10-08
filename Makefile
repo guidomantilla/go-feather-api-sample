@@ -4,6 +4,7 @@ phony-goal: ; @echo $@
 validate: generate sort-import format vet lint coverage
 
 generate:
+	docker run -it --rm -v $(PWD):/app/project --platform linux/amd64 gitea.linuxcode.net/linuxcode/dbml-go ./dbml-go-generator -f ./project/resources/dbml/db.dbml -p model -o ./project/pkg/models
 	go generate ./...
 
 sort-import:
