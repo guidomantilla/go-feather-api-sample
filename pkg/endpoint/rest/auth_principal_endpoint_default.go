@@ -20,19 +20,17 @@ func NewDefaultAuthPrincipalEndpoint(principalManager feather_security.Principal
 
 func (endpoint *DefaultAuthPrincipalEndpoint) GetCurrentPrincipal(ctx *gin.Context) {
 
-	var principal any
 	var exists bool
-	if principal, exists = ctx.Get("principal"); !exists {
+	var principal *feather_security.Principal
+	if principal, exists = feather_security.GetPrincipalFROMContext(ctx); !exists {
 		ex := feather_web_rest.NotFoundException("principal not found in context")
 		ctx.AbortWithStatusJSON(ex.Code, ex)
 		return
 	}
 
-	username := principal.(*feather_security.Principal).Username
-
 	var err error
 	var user *feather_security.Principal
-	if user, err = endpoint.principalManager.Find(ctx.Request.Context(), *username); err != nil {
+	if user, err = endpoint.principalManager.Find(ctx.Request.Context(), *principal.Username); err != nil {
 		ex := feather_web_rest.UnauthorizedException(err.Error())
 		ctx.AbortWithStatusJSON(ex.Code, ex)
 		return
