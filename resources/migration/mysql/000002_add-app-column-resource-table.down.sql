@@ -1,0 +1,1 @@
+alter table auth_resources drop column application;

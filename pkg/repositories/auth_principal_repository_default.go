@@ -17,7 +17,7 @@ type DefaultAuthPrincipalRepository struct {
 
 func NewDefaultAuthPrincipalRepository() *DefaultAuthPrincipalRepository {
 	return &DefaultAuthPrincipalRepository{
-		statementFindByUsername:   "SELECT username, role, resource, permission, password, passphrase, enabled FROM auth_principal WHERE username = ?",
+		statementFindByUsername:   "SELECT username, role, application, resource, permission, password, passphrase, enabled FROM auth_principal WHERE username = ?",
 		statementExistsByUsername: "SELECT distinct(username) FROM auth_principal WHERE username = ?",
 	}
 }
@@ -52,7 +52,7 @@ func (repository *DefaultAuthPrincipalRepository) FindByUsername(ctx context.Con
 		for rows.Next() {
 
 			var principal models.AuthPrincipal
-			if err = rows.Scan(&principal.Username, &principal.Role, &principal.Resource, &principal.Permission, &principal.Password, &principal.Passphrase, &principal.Enabled); err != nil {
+			if err = rows.Scan(&principal.Username, &principal.Role, &principal.Application, &principal.Resource, &principal.Permission, &principal.Password, &principal.Passphrase, &principal.Enabled); err != nil {
 				return err
 			}
 			principals = append(principals, principal)

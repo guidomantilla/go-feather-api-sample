@@ -1,5 +1,10 @@
 package config
 
+const (
+	Application = "go-feather-api-sample"
+	Version     = "v0.3.0"
+)
+
 type Config struct {
 	Host               *string `env:"HOST,default=localhost"`
 	HttpPort           *string `env:"HTTP_PORT,default=8080"`

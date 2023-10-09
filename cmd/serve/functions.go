@@ -22,7 +22,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 
 	ctx := context.Background()
 	logger := feather_commons_log.Custom()
-	appName, version := "go-feather-api-sample", "v0.3.0"
+	appName, version := config.Application, config.Version
 
 	authPrincipalRepository := repositories.NewDefaultAuthPrincipalRepository()
 

@@ -22,7 +22,7 @@ func (endpoint *DefaultAuthPrincipalEndpoint) GetCurrentPrincipal(ctx *gin.Conte
 
 	var exists bool
 	var principal *feather_security.Principal
-	if principal, exists = feather_security.GetPrincipalFROMContext(ctx); !exists {
+	if principal, exists = feather_security.GetPrincipalFromContext(ctx); !exists {
 		ex := feather_web_rest.NotFoundException("principal not found in context")
 		ctx.AbortWithStatusJSON(ex.Code, ex)
 		return

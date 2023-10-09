@@ -6,10 +6,12 @@ import (
 	"errors"
 	"strings"
 
+	feather_commons_collections "github.com/guidomantilla/go-feather-commons/pkg/collections"
 	feather_commons_util "github.com/guidomantilla/go-feather-commons/pkg/util"
 	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
 	feather_sql_datasource "github.com/guidomantilla/go-feather-sql/pkg/datasource"
 
+	"github.com/guidomantilla/go-feather-api-sample/pkg/config"
 	"github.com/guidomantilla/go-feather-api-sample/pkg/models"
 	"github.com/guidomantilla/go-feather-api-sample/pkg/repositories"
 )
@@ -55,15 +57,17 @@ func (manager *DBPrincipalManager) Find(ctx context.Context, username string) (*
 		if authPrincipals, err = manager.authPrincipalRepository.FindByUsername(ctx, username); err != nil {
 			return err
 		}
+		authPrincipals = feather_commons_collections.Filter[models.AuthPrincipal](authPrincipals, func(principal models.AuthPrincipal, _ int) bool {
+			return (*principal.Application) == config.Application
+		})
 
 		if len(authPrincipals) == 0 {
 			return errors.New("no principal found")
 		}
 
-		resources := make([]string, len(authPrincipals))
-		for i, authPrincipal := range authPrincipals {
-			resources[i] = strings.Join([]string{*authPrincipal.Permission, *authPrincipal.Resource}, " ")
-		}
+		resources := feather_commons_collections.Map[models.AuthPrincipal, string](authPrincipals, func(principal models.AuthPrincipal, _ int) string {
+			return strings.Join([]string{*principal.Application, *principal.Permission, *principal.Resource}, " ")
+		})
 
 		principal = &feather_security.Principal{
 			Username:           authPrincipals[0].Username,
@@ -109,10 +113,8 @@ func (manager *DBPrincipalManager) VerifyResource(ctx context.Context, username 
 		return err
 	}
 
-	for _, rsrc := range principal.Resources {
-		if resource == rsrc {
-			return nil
-		}
+	if feather_commons_collections.Contains(principal.Resources, resource) {
+		return nil
 	}
 
 	return feather_security.ErrAccountInvalidAuthorities

@@ -38,11 +38,12 @@ type AuthUser struct {
 }
 
 type AuthPrincipal struct {
-	Username   *string `db_column:"username,uq"`
-	Role       *string `db_column:"role"`
-	Resource   *string `db_column:"resource"`
-	Permission *string `db_column:"permission"`
-	Password   *string `db_column:"password"`
-	Passphrase *string `db_column:"passphrase"`
-	Enabled    *bool   `db_column:"enabled"`
+	Username    *string `db_column:"username,uq"`
+	Role        *string `db_column:"role"`
+	Application *string `db_column:"application"`
+	Resource    *string `db_column:"resource"`
+	Permission  *string `db_column:"permission"`
+	Password    *string `db_column:"password"`
+	Passphrase  *string `db_column:"passphrase"`
+	Enabled     *bool   `db_column:"enabled"`
 }

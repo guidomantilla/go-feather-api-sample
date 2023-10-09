@@ -1,0 +1,1 @@
+alter table auth_resources add application varchar(100) not null after name;
