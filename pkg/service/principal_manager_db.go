@@ -33,18 +33,42 @@ func NewDBPrincipalManager(transactionHandler feather_sql_datasource.Transaction
 }
 
 func (manager *DBPrincipalManager) Create(ctx context.Context, principal *feather_security.Principal) error {
-	//TODO implement me
-	panic("implement me")
+	var err error
+	err = manager.transactionHandler.HandleTransaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (manager *DBPrincipalManager) Update(ctx context.Context, principal *feather_security.Principal) error {
-	//TODO implement me
-	panic("implement me")
+	var err error
+	err = manager.transactionHandler.HandleTransaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (manager *DBPrincipalManager) Delete(ctx context.Context, username string) error {
-	//TODO implement me
-	panic("implement me")
+	var err error
+	err = manager.transactionHandler.HandleTransaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (manager *DBPrincipalManager) Find(ctx context.Context, username string) (*feather_security.Principal, error) {
@@ -101,8 +125,16 @@ func (manager *DBPrincipalManager) Exists(ctx context.Context, username string) 
 }
 
 func (manager *DBPrincipalManager) ChangePassword(ctx context.Context, username string, password string) error {
-	//TODO implement me
-	panic("implement me")
+	var err error
+	err = manager.transactionHandler.HandleTransaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (manager *DBPrincipalManager) VerifyResource(ctx context.Context, username string, resource string) error {
