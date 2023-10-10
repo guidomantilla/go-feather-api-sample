@@ -75,10 +75,10 @@ func (manager *DBPrincipalManager) Find(ctx context.Context, username string) (*
 			Password:           authPrincipals[0].Password,
 			Passphrase:         authPrincipals[0].Passphrase,
 			Enabled:            authPrincipals[0].Enabled,
-			NonLocked:          feather_commons_util.ValueToPtr(true),
-			NonExpired:         feather_commons_util.ValueToPtr(true),
-			PasswordNonExpired: feather_commons_util.ValueToPtr(true),
-			SignUpDone:         feather_commons_util.ValueToPtr(true),
+			NonLocked:          feather_commons_util.TruePrt(),
+			NonExpired:         feather_commons_util.TruePrt(),
+			PasswordNonExpired: feather_commons_util.TruePrt(),
+			SignUpDone:         feather_commons_util.TruePrt(),
 			Resources:          resources,
 		}
 

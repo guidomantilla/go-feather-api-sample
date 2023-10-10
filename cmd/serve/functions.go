@@ -24,9 +24,16 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 	logger := feather_commons_log.Custom()
 	appName, version := config.Application, config.Version
 
+	enablers := &feather_boot.Enablers{
+		HttpServerEnabled: true,
+		GrpcServerEnabled: true,
+		DatabaseEnabled:   true,
+	}
+
 	authPrincipalRepository := repositories.NewDefaultAuthPrincipalRepository()
 
 	builder := feather_boot.NewBeanBuilder(ctx)
+
 	builder.Config = func(appCtx *feather_boot.ApplicationContext) {
 		var cfg config.Config
 		if err := feather_commons_config.Process(ctx, appCtx.Environment, &cfg); err != nil {
@@ -57,6 +64,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 			DatasourcePassword: cfg.DatasourcePassword,
 		}
 	}
+
 	builder.PrincipalManager = func(appCtx *feather_boot.ApplicationContext) feather_security.PrincipalManager {
 		return service.NewDBPrincipalManager(appCtx.TransactionHandler, authPrincipalRepository)
 	}
@@ -64,38 +72,16 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		grpcServer := rpc.NewApiSampleGrpcServer(appCtx.AuthenticationService, appCtx.AuthorizationService, appCtx.PrincipalManager)
 		return &rpc.ApiSample_ServiceDesc, grpcServer
 	}
-	err := feather_boot.Init(appName, version, args, logger, builder, func(appCtx feather_boot.ApplicationContext) error {
-
-		authResourceEndpoint := rest.NewDefaultAuthResourceEndpoint()
-		appCtx.PrivateRouter.GET("/resources", authResourceEndpoint.FindAll)
-		appCtx.PrivateRouter.GET("/resources/:id", authResourceEndpoint.FindById)
-		appCtx.PrivateRouter.POST("/resources", authResourceEndpoint.Create)
-		appCtx.PrivateRouter.PUT("/resources/:id", authResourceEndpoint.Update)
-		appCtx.PrivateRouter.DELETE("/resources/:id", authResourceEndpoint.Delete)
-
-		authRoleEndpoint := rest.NewDefaultAuthRoleEndpoint()
-		appCtx.PrivateRouter.GET("/roles", authRoleEndpoint.FindAll)
-		appCtx.PrivateRouter.GET("/roles/:id", authRoleEndpoint.FindById)
-		appCtx.PrivateRouter.POST("/roles", authRoleEndpoint.Create)
-		appCtx.PrivateRouter.PUT("/roles/:id", authRoleEndpoint.Update)
-		appCtx.PrivateRouter.DELETE("/roles/:id", authRoleEndpoint.Delete)
-
-		authAclEndpoint := rest.NewDefaultAuthAccessControlListEndpoint()
-		appCtx.PrivateRouter.GET("/acls", authAclEndpoint.FindAll)
-		appCtx.PrivateRouter.GET("/acls/:id", authAclEndpoint.FindById)
-		appCtx.PrivateRouter.POST("/acls", authAclEndpoint.Create)
-		appCtx.PrivateRouter.PUT("/acls/:id", authAclEndpoint.Update)
-		appCtx.PrivateRouter.DELETE("/acls/:id", authAclEndpoint.Delete)
-
-		authUserEndpoint := rest.NewDefaultAuthUserEndpoint()
-		appCtx.PrivateRouter.GET("/users", authUserEndpoint.FindAll)
-		appCtx.PrivateRouter.GET("/users/:id", authUserEndpoint.FindById)
-		appCtx.PrivateRouter.POST("/users", authUserEndpoint.Create)
-		appCtx.PrivateRouter.PUT("/users/:id", authUserEndpoint.Update)
-		appCtx.PrivateRouter.DELETE("/users/:id", authUserEndpoint.Delete)
+	err := feather_boot.Init(appName, version, args, logger, enablers, builder, func(appCtx feather_boot.ApplicationContext) error {
 
 		authPrincipalEndpoint := rest.NewDefaultAuthPrincipalEndpoint(appCtx.PrincipalManager)
-		appCtx.PrivateRouter.GET("/principal", authPrincipalEndpoint.GetCurrentPrincipal)
+		appCtx.PrivateRouter.GET("/principals/current", authPrincipalEndpoint.FindCurrent)
+		appCtx.PrivateRouter.GET("/principals/:username", authPrincipalEndpoint.FindByUsername)
+		appCtx.PrivateRouter.POST("/principals", authPrincipalEndpoint.Create)
+		appCtx.PrivateRouter.PUT("/principals", authPrincipalEndpoint.Update)
+		appCtx.PrivateRouter.DELETE("/principals", authPrincipalEndpoint.Delete)
+		appCtx.PrivateRouter.PATCH("/principals/change-password", authPrincipalEndpoint.ChangePassword)
+		appCtx.PrivateRouter.PATCH("/principals/verify-resource", authPrincipalEndpoint.VerifyResource)
 
 		return nil
 	})
