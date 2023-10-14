@@ -54,25 +54,25 @@ select u.username,
     where (u.enabled = r.enabled = ar.enabled = acl.enabled) = 1;
 
 
-insert into auth_resources (name, application, enabled) values ('/principals/current', 'go-feather-api-sample', true);
-insert into auth_resources (name, application, enabled) values ('/principals/:username', 'go-feather-api-sample', true);
-insert into auth_resources (name, application, enabled) values ('/principals', 'go-feather-api-sample', true);
-insert into auth_resources (name, application, enabled) values ('/principals/change-password', 'go-feather-api-sample', true);
+insert into auth_resources (name, application, enabled) values ('/api/principals/current', 'go-feather-api-sample', true);
+insert into auth_resources (name, application, enabled) values ('/api/principals/:username', 'go-feather-api-sample', true);
+insert into auth_resources (name, application, enabled) values ('/api/principals', 'go-feather-api-sample', true);
+insert into auth_resources (name, application, enabled) values ('/api/principals/change-password', 'go-feather-api-sample', true);
 
 insert into auth_roles (name, enabled) values ('admin', true);
 insert into auth_roles (name, enabled) values ('user', true);
 
-insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals/current', 'GET', true);
-insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals/:username', 'GET', true);
-insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals', 'POST', true);
-insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals', 'PUT', true);
-insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals', 'DELETE', true);
-insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals/change-password', 'PATCH', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals/current', 'GET', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals/:username', 'GET', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals', 'POST', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals', 'PUT', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals', 'DELETE', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals/change-password', 'PATCH', true);
 
-insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/principals/current', 'GET', true);
-insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/principals', 'POST', true);
-insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/principals', 'PUT', true);
-insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/principals/change-password', 'PATCH', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/api/principals/current', 'GET', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/api/principals', 'POST', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/api/principals', 'PUT', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/api/principals/change-password', 'PATCH', true);
 
-insert into auth_users (username, role, password, passphrase, enabled) values ('root', 'admin', '$2a$10$DMrp3hAmPg0EV16AchnF0.rdTiHJ/g3k7J9klzGVZoiZOzSR3u/le', '', true);
-insert into auth_users (username, role, password, passphrase, enabled) values ('raven', 'user', '$2a$10$DMrp3hAmPg0EV16AchnF0.rdTiHJ/g3k7J9klzGVZoiZOzSR3u/le', '', true);
+insert into auth_users (username, role, password, passphrase, enabled) values ('root', 'admin', '{bcrypt}$2a$10$DMrp3hAmPg0EV16AchnF0.rdTiHJ/g3k7J9klzGVZoiZOzSR3u/le', '', true);
+insert into auth_users (username, role, password, passphrase, enabled) values ('raven', 'user', '{bcrypt}$2a$10$DMrp3hAmPg0EV16AchnF0.rdTiHJ/g3k7J9klzGVZoiZOzSR3u/le', '', true);

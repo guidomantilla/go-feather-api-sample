@@ -12,7 +12,5 @@ type AuthPrincipalEndpoint interface {
 	Delete(ctx *gin.Context)
 	FindByUsername(ctx *gin.Context)
 	FindCurrent(ctx *gin.Context)
-
 	ChangePassword(ctx *gin.Context)
-	VerifyResource(ctx *gin.Context)
 }

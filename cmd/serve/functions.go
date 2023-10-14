@@ -2,6 +2,7 @@ package serve
 
 import (
 	"context"
+	"fmt"
 
 	feather_boot "github.com/guidomantilla/go-feather-boot/pkg/boot"
 	feather_commons_config "github.com/guidomantilla/go-feather-commons/pkg/config"
@@ -23,21 +24,19 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 	ctx := context.Background()
 	logger := feather_commons_log.Custom()
 	appName, version := config.Application, config.Version
-
 	enablers := &feather_boot.Enablers{
 		HttpServerEnabled: true,
 		GrpcServerEnabled: true,
 		DatabaseEnabled:   true,
 	}
 
-	authPrincipalRepository := repositories.NewDefaultAuthPrincipalRepository()
+	repository := repositories.NewDefaultRepository()
 
 	builder := feather_boot.NewBeanBuilder(ctx)
-
 	builder.Config = func(appCtx *feather_boot.ApplicationContext) {
 		var cfg config.Config
 		if err := feather_commons_config.Process(ctx, appCtx.Environment, &cfg); err != nil {
-			feather_commons_log.Fatal("starting up - error setting up configuration.", "message", err.Error())
+			feather_commons_log.Fatal(fmt.Sprintf("starting up - error setting up configuration: %s", err.Error()))
 		}
 
 		appCtx.HttpConfig = &feather_boot.HttpConfig{
@@ -51,7 +50,8 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		}
 
 		appCtx.SecurityConfig = &feather_boot.SecurityConfig{
-			TokenSignatureKey: cfg.TokenSignatureKey,
+			TokenSignatureKey:    cfg.TokenSignatureKey,
+			TokenVerificationKey: cfg.TokenSignatureKey,
 		}
 
 		appCtx.DatabaseConfig = &feather_boot.DatabaseConfig{
@@ -64,9 +64,8 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 			DatasourcePassword: cfg.DatasourcePassword,
 		}
 	}
-
 	builder.PrincipalManager = func(appCtx *feather_boot.ApplicationContext) feather_security.PrincipalManager {
-		return service.NewDBPrincipalManager(appCtx.TransactionHandler, authPrincipalRepository)
+		return service.NewDBPrincipalManager(appCtx.TransactionHandler, appCtx.PasswordManager, repository)
 	}
 	builder.GrpcServer = func(appCtx *feather_boot.ApplicationContext) (*grpc.ServiceDesc, any) {
 		grpcServer := rpc.NewApiSampleGrpcServer(appCtx.AuthenticationService, appCtx.AuthorizationService, appCtx.PrincipalManager)
@@ -81,7 +80,6 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		appCtx.PrivateRouter.PUT("/principals", authPrincipalEndpoint.Update)
 		appCtx.PrivateRouter.DELETE("/principals", authPrincipalEndpoint.Delete)
 		appCtx.PrivateRouter.PATCH("/principals/change-password", authPrincipalEndpoint.ChangePassword)
-		appCtx.PrivateRouter.PATCH("/principals/verify-resource", authPrincipalEndpoint.VerifyResource)
 
 		return nil
 	})

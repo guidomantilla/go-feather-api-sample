@@ -2,12 +2,10 @@ package repositories
 
 import (
 	"errors"
+
+	feather_commons_errors "github.com/guidomantilla/go-feather-commons/pkg/errors"
 )
 
-func ErrFindByUsername(errs ...error) error {
-	return errors.New("db find by user name failed: " + errors.Join(errs...).Error())
-}
-
-func ErrExistsByUsername(errs ...error) error {
-	return errors.New("db exists by user name failed: " + errors.Join(errs...).Error())
+func ErrFindPrincipal(errs ...error) error {
+	return errors.New("find principal failed: " + feather_commons_errors.ErrJoin(errs...).Error())
 }

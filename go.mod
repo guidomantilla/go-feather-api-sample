@@ -12,6 +12,7 @@ require (
 	github.com/guidomantilla/go-feather-sql v0.5.1
 	github.com/guidomantilla/go-feather-web v0.5.1
 	github.com/jackc/pgx/v4 v4.18.1
+	github.com/jmoiron/sqlx v1.3.5
 	github.com/sijms/go-ora/v2 v2.7.19
 	github.com/spf13/cobra v1.7.0
 	google.golang.org/grpc v1.58.2

@@ -105,15 +105,3 @@ func (mr *MockAuthPrincipalEndpointMockRecorder) Update(ctx interface{}) *gomock
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAuthPrincipalEndpoint)(nil).Update), ctx)
 }
-
-// VerifyResource mocks base method.
-func (m *MockAuthPrincipalEndpoint) VerifyResource(ctx *gin.Context) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "VerifyResource", ctx)
-}
-
-// VerifyResource indicates an expected call of VerifyResource.
-func (mr *MockAuthPrincipalEndpointMockRecorder) VerifyResource(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyResource", reflect.TypeOf((*MockAuthPrincipalEndpoint)(nil).VerifyResource), ctx)
-}
