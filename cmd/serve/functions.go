@@ -30,7 +30,8 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		DatabaseEnabled:   true,
 	}
 
-	repository := repositories.NewDefaultRepository()
+	queriesMap := repositories.BuildQueries()
+	repository := repositories.NewDefaultRepository(queriesMap)
 
 	builder := feather_boot.NewBeanBuilder(ctx)
 	builder.Config = func(appCtx *feather_boot.ApplicationContext) {

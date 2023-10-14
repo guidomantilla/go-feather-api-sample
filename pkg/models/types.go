@@ -36,3 +36,5 @@ type AuthPrincipal struct {
 	Passphrase  *string `db:"passphrase"`
 	Enabled     *bool   `db:"enabled"`
 }
+
+//

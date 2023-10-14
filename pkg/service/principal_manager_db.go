@@ -63,7 +63,7 @@ func (manager *DBPrincipalManager) Upsert(ctx context.Context, principal *feathe
 		queryBy := &models.AuthUser{
 			Username: principal.Username,
 		}
-		err = manager.repository.FindUser(ctx, queryBy)
+		err = manager.repository.FindUserById(ctx, queryBy)
 		if mode == "Create" && err != nil {
 			return err
 		} else if mode == "Update" && err == nil {
@@ -148,7 +148,7 @@ func (manager *DBPrincipalManager) Find(ctx context.Context, username string) (*
 		}
 
 		var authPrincipals []models.AuthPrincipal
-		if authPrincipals, err = manager.repository.FindPrincipalByUsernameAndApplication(ctx, queryBy); err != nil {
+		if authPrincipals, err = manager.repository.FindPrincipalById(ctx, queryBy); err != nil {
 			return err
 		}
 		if len(authPrincipals) == 0 {

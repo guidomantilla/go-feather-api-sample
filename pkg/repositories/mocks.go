@@ -91,75 +91,75 @@ func (mr *MockRepositoryMockRecorder) DeleteUser(ctx, user interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockRepository)(nil).DeleteUser), ctx, user)
 }
 
-// FindAccessControlList mocks base method.
-func (m *MockRepository) FindAccessControlList(ctx context.Context, acl *models.AuthAccessControlList) error {
+// FindAccessControlListById mocks base method.
+func (m *MockRepository) FindAccessControlListById(ctx context.Context, acl *models.AuthAccessControlList) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAccessControlList", ctx, acl)
+	ret := m.ctrl.Call(m, "FindAccessControlListById", ctx, acl)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// FindAccessControlList indicates an expected call of FindAccessControlList.
-func (mr *MockRepositoryMockRecorder) FindAccessControlList(ctx, acl interface{}) *gomock.Call {
+// FindAccessControlListById indicates an expected call of FindAccessControlListById.
+func (mr *MockRepositoryMockRecorder) FindAccessControlListById(ctx, acl interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAccessControlList", reflect.TypeOf((*MockRepository)(nil).FindAccessControlList), ctx, acl)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAccessControlListById", reflect.TypeOf((*MockRepository)(nil).FindAccessControlListById), ctx, acl)
 }
 
-// FindPrincipalByUsernameAndApplication mocks base method.
-func (m *MockRepository) FindPrincipalByUsernameAndApplication(ctx context.Context, principal *models.AuthPrincipal) ([]models.AuthPrincipal, error) {
+// FindPrincipalById mocks base method.
+func (m *MockRepository) FindPrincipalById(ctx context.Context, principal *models.AuthPrincipal) ([]models.AuthPrincipal, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindPrincipalByUsernameAndApplication", ctx, principal)
+	ret := m.ctrl.Call(m, "FindPrincipalById", ctx, principal)
 	ret0, _ := ret[0].([]models.AuthPrincipal)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindPrincipalByUsernameAndApplication indicates an expected call of FindPrincipalByUsernameAndApplication.
-func (mr *MockRepositoryMockRecorder) FindPrincipalByUsernameAndApplication(ctx, principal interface{}) *gomock.Call {
+// FindPrincipalById indicates an expected call of FindPrincipalById.
+func (mr *MockRepositoryMockRecorder) FindPrincipalById(ctx, principal interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindPrincipalByUsernameAndApplication", reflect.TypeOf((*MockRepository)(nil).FindPrincipalByUsernameAndApplication), ctx, principal)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindPrincipalById", reflect.TypeOf((*MockRepository)(nil).FindPrincipalById), ctx, principal)
 }
 
-// FindResource mocks base method.
-func (m *MockRepository) FindResource(ctx context.Context, resource *models.AuthResource) error {
+// FindResourceById mocks base method.
+func (m *MockRepository) FindResourceById(ctx context.Context, resource *models.AuthResource) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindResource", ctx, resource)
+	ret := m.ctrl.Call(m, "FindResourceById", ctx, resource)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// FindResource indicates an expected call of FindResource.
-func (mr *MockRepositoryMockRecorder) FindResource(ctx, resource interface{}) *gomock.Call {
+// FindResourceById indicates an expected call of FindResourceById.
+func (mr *MockRepositoryMockRecorder) FindResourceById(ctx, resource interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindResource", reflect.TypeOf((*MockRepository)(nil).FindResource), ctx, resource)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindResourceById", reflect.TypeOf((*MockRepository)(nil).FindResourceById), ctx, resource)
 }
 
-// FindRole mocks base method.
-func (m *MockRepository) FindRole(ctx context.Context, role *models.AuthRole) error {
+// FindRoleById mocks base method.
+func (m *MockRepository) FindRoleById(ctx context.Context, role *models.AuthRole) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindRole", ctx, role)
+	ret := m.ctrl.Call(m, "FindRoleById", ctx, role)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// FindRole indicates an expected call of FindRole.
-func (mr *MockRepositoryMockRecorder) FindRole(ctx, role interface{}) *gomock.Call {
+// FindRoleById indicates an expected call of FindRoleById.
+func (mr *MockRepositoryMockRecorder) FindRoleById(ctx, role interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindRole", reflect.TypeOf((*MockRepository)(nil).FindRole), ctx, role)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindRoleById", reflect.TypeOf((*MockRepository)(nil).FindRoleById), ctx, role)
 }
 
-// FindUser mocks base method.
-func (m *MockRepository) FindUser(ctx context.Context, user *models.AuthUser) error {
+// FindUserById mocks base method.
+func (m *MockRepository) FindUserById(ctx context.Context, user *models.AuthUser) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindUser", ctx, user)
+	ret := m.ctrl.Call(m, "FindUserById", ctx, user)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// FindUser indicates an expected call of FindUser.
-func (mr *MockRepositoryMockRecorder) FindUser(ctx, user interface{}) *gomock.Call {
+// FindUserById indicates an expected call of FindUserById.
+func (mr *MockRepositoryMockRecorder) FindUserById(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindUser", reflect.TypeOf((*MockRepository)(nil).FindUser), ctx, user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindUserById", reflect.TypeOf((*MockRepository)(nil).FindUserById), ctx, user)
 }
 
 // SaveAccessControlList mocks base method.
