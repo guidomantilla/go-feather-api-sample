@@ -43,7 +43,7 @@ func NewDefaultRepository() *DefaultRepository {
 	}
 }
 
-func (repository *DefaultRepository) FindPrincipalByUsernameAndApplication(ctx context.Context, principal *models.AuthPrincipal) ([]models.AuthPrincipal, error) {
+func (repository *DefaultRepository) FindPrincipal(ctx context.Context, principal *models.AuthPrincipal) ([]models.AuthPrincipal, error) {
 	return feather_sql_dao.QueryMany[models.AuthPrincipal](ctx, repository.statementFindPrincipal, principal)
 }
 

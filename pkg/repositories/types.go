@@ -11,7 +11,7 @@ var (
 )
 
 type Repository interface {
-	FindPrincipalByUsernameAndApplication(ctx context.Context, principal *models.AuthPrincipal) ([]models.AuthPrincipal, error)
+	FindPrincipal(ctx context.Context, principal *models.AuthPrincipal) ([]models.AuthPrincipal, error)
 
 	FindResource(ctx context.Context, resource *models.AuthResource) error
 	SaveResource(ctx context.Context, resource *models.AuthResource) error
