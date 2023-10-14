@@ -19,17 +19,17 @@ func NewDefaultRepository(queriesMap QueriesMap) *DefaultRepository {
 }
 
 func (repository *DefaultRepository) FindPrincipalById(ctx context.Context, principal *models.AuthPrincipal) ([]models.AuthPrincipal, error) {
-	return feather_sql_dao.QueryMany[models.AuthPrincipal](ctx, repository.queriesMap["FindPrincipalById"], principal)
+	return feather_sql_dao.QueryMany[models.AuthPrincipal](ctx, repository.queriesMap[FindPrincipalByIdQuery], principal)
 }
 
 //
 
 func (repository *DefaultRepository) FindResourceById(ctx context.Context, resource *models.AuthResource) error {
-	return feather_sql_dao.QueryOne[models.AuthResource](ctx, repository.queriesMap["FindResourceById"], resource)
+	return feather_sql_dao.QueryOne[models.AuthResource](ctx, repository.queriesMap[FindResourceByIdQuery], resource)
 }
 
 func (repository *DefaultRepository) SaveResource(ctx context.Context, resource *models.AuthResource) error {
-	return feather_sql_dao.MutateOne[models.AuthResource](ctx, repository.queriesMap["SaveResource"], resource)
+	return feather_sql_dao.MutateOne[models.AuthResource](ctx, repository.queriesMap[SaveResourceQuery], resource)
 }
 
 func (repository *DefaultRepository) DeleteResource(ctx context.Context, resource *models.AuthResource) error {
