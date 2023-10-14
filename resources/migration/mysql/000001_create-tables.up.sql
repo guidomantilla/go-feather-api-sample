@@ -19,6 +19,7 @@ create table if not exists auth_access_control_list
     resource    varchar(100)         not null,
     permission  varchar(20)          not null,
     enabled     tinyint(1) default 1 not null,
+    primary key (role, resource, permission),
     constraint auth_access_control_list_auth_resources_fk
         foreign key (resource) references auth_resources (name),
     constraint auth_access_control_list_auth_roles_fk
@@ -53,4 +54,25 @@ select u.username,
     where (u.enabled = r.enabled = ar.enabled = acl.enabled) = 1;
 
 
+insert into auth_resources (name, application, enabled) values ('/principals/current', 'go-feather-api-sample', true);
+insert into auth_resources (name, application, enabled) values ('/principals/:username', 'go-feather-api-sample', true);
+insert into auth_resources (name, application, enabled) values ('/principals', 'go-feather-api-sample', true);
+insert into auth_resources (name, application, enabled) values ('/principals/change-password', 'go-feather-api-sample', true);
 
+insert into auth_roles (name, enabled) values ('admin', true);
+insert into auth_roles (name, enabled) values ('user', true);
+
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals/current', 'GET', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals/:username', 'GET', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals', 'POST', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals', 'PUT', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals', 'DELETE', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/principals/change-password', 'PATCH', true);
+
+insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/principals/current', 'GET', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/principals', 'POST', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/principals', 'PUT', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/principals/change-password', 'PATCH', true);
+
+insert into auth_users (username, role, password, passphrase, enabled) values ('root', 'admin', '$2a$10$DMrp3hAmPg0EV16AchnF0.rdTiHJ/g3k7J9klzGVZoiZOzSR3u/le', '', true);
+insert into auth_users (username, role, password, passphrase, enabled) values ('raven', 'user', '$2a$10$DMrp3hAmPg0EV16AchnF0.rdTiHJ/g3k7J9klzGVZoiZOzSR3u/le', '', true);

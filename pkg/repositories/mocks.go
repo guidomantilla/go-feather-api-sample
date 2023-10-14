@@ -10,511 +10,127 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	models "github.com/guidomantilla/go-feather-api-sample/pkg/models"
+	sqlx "github.com/jmoiron/sqlx"
 )
 
-// MockAuthResourceRepository is a mock of AuthResourceRepository interface.
-type MockAuthResourceRepository struct {
+// MockRepository is a mock of Repository interface.
+type MockRepository struct {
 	ctrl     *gomock.Controller
-	recorder *MockAuthResourceRepositoryMockRecorder
+	recorder *MockRepositoryMockRecorder
 }
 
-// MockAuthResourceRepositoryMockRecorder is the mock recorder for MockAuthResourceRepository.
-type MockAuthResourceRepositoryMockRecorder struct {
-	mock *MockAuthResourceRepository
+// MockRepositoryMockRecorder is the mock recorder for MockRepository.
+type MockRepositoryMockRecorder struct {
+	mock *MockRepository
 }
 
-// NewMockAuthResourceRepository creates a new mock instance.
-func NewMockAuthResourceRepository(ctrl *gomock.Controller) *MockAuthResourceRepository {
-	mock := &MockAuthResourceRepository{ctrl: ctrl}
-	mock.recorder = &MockAuthResourceRepositoryMockRecorder{mock}
+// NewMockRepository creates a new mock instance.
+func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
+	mock := &MockRepository{ctrl: ctrl}
+	mock.recorder = &MockRepositoryMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAuthResourceRepository) EXPECT() *MockAuthResourceRepositoryMockRecorder {
+func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
-// Create mocks base method.
-func (m *MockAuthResourceRepository) Create(ctx context.Context, authResource *models.AuthResource) error {
+// CreateAccessControlList mocks base method.
+func (m *MockRepository) CreateAccessControlList(ctx context.Context, tx *sqlx.Tx, acl *models.AuthAccessControlList) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, authResource)
+	ret := m.ctrl.Call(m, "CreateAccessControlList", ctx, tx, acl)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Create indicates an expected call of Create.
-func (mr *MockAuthResourceRepositoryMockRecorder) Create(ctx, authResource interface{}) *gomock.Call {
+// CreateAccessControlList indicates an expected call of CreateAccessControlList.
+func (mr *MockRepositoryMockRecorder) CreateAccessControlList(ctx, tx, acl interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAuthResourceRepository)(nil).Create), ctx, authResource)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccessControlList", reflect.TypeOf((*MockRepository)(nil).CreateAccessControlList), ctx, tx, acl)
 }
 
-// DeleteById mocks base method.
-func (m *MockAuthResourceRepository) DeleteById(ctx context.Context, id int64) error {
+// CreateResource mocks base method.
+func (m *MockRepository) CreateResource(ctx context.Context, tx *sqlx.Tx, resource *models.AuthResource) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteById", ctx, id)
+	ret := m.ctrl.Call(m, "CreateResource", ctx, tx, resource)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteById indicates an expected call of DeleteById.
-func (mr *MockAuthResourceRepositoryMockRecorder) DeleteById(ctx, id interface{}) *gomock.Call {
+// CreateResource indicates an expected call of CreateResource.
+func (mr *MockRepositoryMockRecorder) CreateResource(ctx, tx, resource interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteById", reflect.TypeOf((*MockAuthResourceRepository)(nil).DeleteById), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateResource", reflect.TypeOf((*MockRepository)(nil).CreateResource), ctx, tx, resource)
 }
 
-// FindAll mocks base method.
-func (m *MockAuthResourceRepository) FindAll(ctx context.Context) ([]models.AuthResource, error) {
+// CreateRole mocks base method.
+func (m *MockRepository) CreateRole(ctx context.Context, tx *sqlx.Tx, role *models.AuthRole) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", ctx)
-	ret0, _ := ret[0].([]models.AuthResource)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindAll indicates an expected call of FindAll.
-func (mr *MockAuthResourceRepositoryMockRecorder) FindAll(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockAuthResourceRepository)(nil).FindAll), ctx)
-}
-
-// FindById mocks base method.
-func (m *MockAuthResourceRepository) FindById(ctx context.Context, id int64) (*models.AuthResource, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindById", ctx, id)
-	ret0, _ := ret[0].(*models.AuthResource)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindById indicates an expected call of FindById.
-func (mr *MockAuthResourceRepositoryMockRecorder) FindById(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindById", reflect.TypeOf((*MockAuthResourceRepository)(nil).FindById), ctx, id)
-}
-
-// FindByName mocks base method.
-func (m *MockAuthResourceRepository) FindByName(ctx context.Context, username string) (*models.AuthResource, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByName", ctx, username)
-	ret0, _ := ret[0].(*models.AuthResource)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByName indicates an expected call of FindByName.
-func (mr *MockAuthResourceRepositoryMockRecorder) FindByName(ctx, username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*MockAuthResourceRepository)(nil).FindByName), ctx, username)
-}
-
-// Update mocks base method.
-func (m *MockAuthResourceRepository) Update(ctx context.Context, authResource *models.AuthResource) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, authResource)
+	ret := m.ctrl.Call(m, "CreateRole", ctx, tx, role)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Update indicates an expected call of Update.
-func (mr *MockAuthResourceRepositoryMockRecorder) Update(ctx, authResource interface{}) *gomock.Call {
+// CreateRole indicates an expected call of CreateRole.
+func (mr *MockRepositoryMockRecorder) CreateRole(ctx, tx, role interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAuthResourceRepository)(nil).Update), ctx, authResource)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRole", reflect.TypeOf((*MockRepository)(nil).CreateRole), ctx, tx, role)
 }
 
-// MockAuthRoleRepository is a mock of AuthRoleRepository interface.
-type MockAuthRoleRepository struct {
-	ctrl     *gomock.Controller
-	recorder *MockAuthRoleRepositoryMockRecorder
-}
-
-// MockAuthRoleRepositoryMockRecorder is the mock recorder for MockAuthRoleRepository.
-type MockAuthRoleRepositoryMockRecorder struct {
-	mock *MockAuthRoleRepository
-}
-
-// NewMockAuthRoleRepository creates a new mock instance.
-func NewMockAuthRoleRepository(ctrl *gomock.Controller) *MockAuthRoleRepository {
-	mock := &MockAuthRoleRepository{ctrl: ctrl}
-	mock.recorder = &MockAuthRoleRepositoryMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAuthRoleRepository) EXPECT() *MockAuthRoleRepositoryMockRecorder {
-	return m.recorder
-}
-
-// Create mocks base method.
-func (m *MockAuthRoleRepository) Create(ctx context.Context, authRole *models.AuthRole) error {
+// CreateUser mocks base method.
+func (m *MockRepository) CreateUser(ctx context.Context, tx *sqlx.Tx, user *models.AuthUser) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, authRole)
+	ret := m.ctrl.Call(m, "CreateUser", ctx, tx, user)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Create indicates an expected call of Create.
-func (mr *MockAuthRoleRepositoryMockRecorder) Create(ctx, authRole interface{}) *gomock.Call {
+// CreateUser indicates an expected call of CreateUser.
+func (mr *MockRepositoryMockRecorder) CreateUser(ctx, tx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAuthRoleRepository)(nil).Create), ctx, authRole)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockRepository)(nil).CreateUser), ctx, tx, user)
 }
 
-// DeleteById mocks base method.
-func (m *MockAuthRoleRepository) DeleteById(ctx context.Context, id int64) error {
+// ExistsPrincipalByParams mocks base method.
+func (m *MockRepository) ExistsPrincipalByParams(ctx context.Context, tx *sqlx.Tx, username, role, application, resource, permission string) bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteById", ctx, id)
+	ret := m.ctrl.Call(m, "ExistsPrincipalByParams", ctx, tx, username, role, application, resource, permission)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// ExistsPrincipalByParams indicates an expected call of ExistsPrincipalByParams.
+func (mr *MockRepositoryMockRecorder) ExistsPrincipalByParams(ctx, tx, username, role, application, resource, permission interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsPrincipalByParams", reflect.TypeOf((*MockRepository)(nil).ExistsPrincipalByParams), ctx, tx, username, role, application, resource, permission)
+}
+
+// ExistsPrincipalByUsernameAndApplication mocks base method.
+func (m *MockRepository) ExistsPrincipalByUsernameAndApplication(ctx context.Context, tx *sqlx.Tx, username, application string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExistsPrincipalByUsernameAndApplication", ctx, tx, username, application)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteById indicates an expected call of DeleteById.
-func (mr *MockAuthRoleRepositoryMockRecorder) DeleteById(ctx, id interface{}) *gomock.Call {
+// ExistsPrincipalByUsernameAndApplication indicates an expected call of ExistsPrincipalByUsernameAndApplication.
+func (mr *MockRepositoryMockRecorder) ExistsPrincipalByUsernameAndApplication(ctx, tx, username, application interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteById", reflect.TypeOf((*MockAuthRoleRepository)(nil).DeleteById), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsPrincipalByUsernameAndApplication", reflect.TypeOf((*MockRepository)(nil).ExistsPrincipalByUsernameAndApplication), ctx, tx, username, application)
 }
 
-// FindAll mocks base method.
-func (m *MockAuthRoleRepository) FindAll(ctx context.Context) ([]models.AuthRole, error) {
+// FindPrincipalByUsernameAndApplication mocks base method.
+func (m *MockRepository) FindPrincipalByUsernameAndApplication(ctx context.Context, tx *sqlx.Tx, username, application string) ([]models.AuthPrincipal, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", ctx)
-	ret0, _ := ret[0].([]models.AuthRole)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindAll indicates an expected call of FindAll.
-func (mr *MockAuthRoleRepositoryMockRecorder) FindAll(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockAuthRoleRepository)(nil).FindAll), ctx)
-}
-
-// FindById mocks base method.
-func (m *MockAuthRoleRepository) FindById(ctx context.Context, id int64) (*models.AuthRole, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindById", ctx, id)
-	ret0, _ := ret[0].(*models.AuthRole)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindById indicates an expected call of FindById.
-func (mr *MockAuthRoleRepositoryMockRecorder) FindById(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindById", reflect.TypeOf((*MockAuthRoleRepository)(nil).FindById), ctx, id)
-}
-
-// FindByName mocks base method.
-func (m *MockAuthRoleRepository) FindByName(ctx context.Context, username string) (*models.AuthRole, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByName", ctx, username)
-	ret0, _ := ret[0].(*models.AuthRole)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByName indicates an expected call of FindByName.
-func (mr *MockAuthRoleRepositoryMockRecorder) FindByName(ctx, username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*MockAuthRoleRepository)(nil).FindByName), ctx, username)
-}
-
-// Update mocks base method.
-func (m *MockAuthRoleRepository) Update(ctx context.Context, authRole *models.AuthRole) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, authRole)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Update indicates an expected call of Update.
-func (mr *MockAuthRoleRepositoryMockRecorder) Update(ctx, authRole interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAuthRoleRepository)(nil).Update), ctx, authRole)
-}
-
-// MockAuthAccessControlListRepository is a mock of AuthAccessControlListRepository interface.
-type MockAuthAccessControlListRepository struct {
-	ctrl     *gomock.Controller
-	recorder *MockAuthAccessControlListRepositoryMockRecorder
-}
-
-// MockAuthAccessControlListRepositoryMockRecorder is the mock recorder for MockAuthAccessControlListRepository.
-type MockAuthAccessControlListRepositoryMockRecorder struct {
-	mock *MockAuthAccessControlListRepository
-}
-
-// NewMockAuthAccessControlListRepository creates a new mock instance.
-func NewMockAuthAccessControlListRepository(ctrl *gomock.Controller) *MockAuthAccessControlListRepository {
-	mock := &MockAuthAccessControlListRepository{ctrl: ctrl}
-	mock.recorder = &MockAuthAccessControlListRepositoryMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAuthAccessControlListRepository) EXPECT() *MockAuthAccessControlListRepositoryMockRecorder {
-	return m.recorder
-}
-
-// Create mocks base method.
-func (m *MockAuthAccessControlListRepository) Create(ctx context.Context, authAccessControlList *models.AuthAccessControlList) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, authAccessControlList)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Create indicates an expected call of Create.
-func (mr *MockAuthAccessControlListRepositoryMockRecorder) Create(ctx, authAccessControlList interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAuthAccessControlListRepository)(nil).Create), ctx, authAccessControlList)
-}
-
-// DeleteById mocks base method.
-func (m *MockAuthAccessControlListRepository) DeleteById(ctx context.Context, id int64) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteById", ctx, id)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteById indicates an expected call of DeleteById.
-func (mr *MockAuthAccessControlListRepositoryMockRecorder) DeleteById(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteById", reflect.TypeOf((*MockAuthAccessControlListRepository)(nil).DeleteById), ctx, id)
-}
-
-// FindAll mocks base method.
-func (m *MockAuthAccessControlListRepository) FindAll(ctx context.Context) ([]models.AuthAccessControlList, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", ctx)
-	ret0, _ := ret[0].([]models.AuthAccessControlList)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindAll indicates an expected call of FindAll.
-func (mr *MockAuthAccessControlListRepositoryMockRecorder) FindAll(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockAuthAccessControlListRepository)(nil).FindAll), ctx)
-}
-
-// FindById mocks base method.
-func (m *MockAuthAccessControlListRepository) FindById(ctx context.Context, id int64) (*models.AuthAccessControlList, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindById", ctx, id)
-	ret0, _ := ret[0].(*models.AuthAccessControlList)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindById indicates an expected call of FindById.
-func (mr *MockAuthAccessControlListRepositoryMockRecorder) FindById(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindById", reflect.TypeOf((*MockAuthAccessControlListRepository)(nil).FindById), ctx, id)
-}
-
-// FindByRole mocks base method.
-func (m *MockAuthAccessControlListRepository) FindByRole(ctx context.Context, role string) ([]models.AuthAccessControlList, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByRole", ctx, role)
-	ret0, _ := ret[0].([]models.AuthAccessControlList)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByRole indicates an expected call of FindByRole.
-func (mr *MockAuthAccessControlListRepositoryMockRecorder) FindByRole(ctx, role interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByRole", reflect.TypeOf((*MockAuthAccessControlListRepository)(nil).FindByRole), ctx, role)
-}
-
-// Update mocks base method.
-func (m *MockAuthAccessControlListRepository) Update(ctx context.Context, authAccessControlList *models.AuthAccessControlList) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, authAccessControlList)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Update indicates an expected call of Update.
-func (mr *MockAuthAccessControlListRepositoryMockRecorder) Update(ctx, authAccessControlList interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAuthAccessControlListRepository)(nil).Update), ctx, authAccessControlList)
-}
-
-// MockAuthUserRepository is a mock of AuthUserRepository interface.
-type MockAuthUserRepository struct {
-	ctrl     *gomock.Controller
-	recorder *MockAuthUserRepositoryMockRecorder
-}
-
-// MockAuthUserRepositoryMockRecorder is the mock recorder for MockAuthUserRepository.
-type MockAuthUserRepositoryMockRecorder struct {
-	mock *MockAuthUserRepository
-}
-
-// NewMockAuthUserRepository creates a new mock instance.
-func NewMockAuthUserRepository(ctrl *gomock.Controller) *MockAuthUserRepository {
-	mock := &MockAuthUserRepository{ctrl: ctrl}
-	mock.recorder = &MockAuthUserRepositoryMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAuthUserRepository) EXPECT() *MockAuthUserRepositoryMockRecorder {
-	return m.recorder
-}
-
-// Create mocks base method.
-func (m *MockAuthUserRepository) Create(ctx context.Context, authUser *models.AuthUser) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, authUser)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Create indicates an expected call of Create.
-func (mr *MockAuthUserRepositoryMockRecorder) Create(ctx, authUser interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAuthUserRepository)(nil).Create), ctx, authUser)
-}
-
-// DeleteById mocks base method.
-func (m *MockAuthUserRepository) DeleteById(ctx context.Context, id int64) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteById", ctx, id)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteById indicates an expected call of DeleteById.
-func (mr *MockAuthUserRepositoryMockRecorder) DeleteById(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteById", reflect.TypeOf((*MockAuthUserRepository)(nil).DeleteById), ctx, id)
-}
-
-// FindAll mocks base method.
-func (m *MockAuthUserRepository) FindAll(ctx context.Context) ([]models.AuthUser, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", ctx)
-	ret0, _ := ret[0].([]models.AuthUser)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindAll indicates an expected call of FindAll.
-func (mr *MockAuthUserRepositoryMockRecorder) FindAll(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockAuthUserRepository)(nil).FindAll), ctx)
-}
-
-// FindById mocks base method.
-func (m *MockAuthUserRepository) FindById(ctx context.Context, id int64) (*models.AuthUser, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindById", ctx, id)
-	ret0, _ := ret[0].(*models.AuthUser)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindById indicates an expected call of FindById.
-func (mr *MockAuthUserRepositoryMockRecorder) FindById(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindById", reflect.TypeOf((*MockAuthUserRepository)(nil).FindById), ctx, id)
-}
-
-// FindByRole mocks base method.
-func (m *MockAuthUserRepository) FindByRole(ctx context.Context, role string) ([]models.AuthUser, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByRole", ctx, role)
-	ret0, _ := ret[0].([]models.AuthUser)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByRole indicates an expected call of FindByRole.
-func (mr *MockAuthUserRepositoryMockRecorder) FindByRole(ctx, role interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByRole", reflect.TypeOf((*MockAuthUserRepository)(nil).FindByRole), ctx, role)
-}
-
-// FindByUsername mocks base method.
-func (m *MockAuthUserRepository) FindByUsername(ctx context.Context, username string) (*models.AuthUser, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByUsername", ctx, username)
-	ret0, _ := ret[0].(*models.AuthUser)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByUsername indicates an expected call of FindByUsername.
-func (mr *MockAuthUserRepositoryMockRecorder) FindByUsername(ctx, username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUsername", reflect.TypeOf((*MockAuthUserRepository)(nil).FindByUsername), ctx, username)
-}
-
-// Update mocks base method.
-func (m *MockAuthUserRepository) Update(ctx context.Context, authUser *models.AuthUser) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, authUser)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Update indicates an expected call of Update.
-func (mr *MockAuthUserRepositoryMockRecorder) Update(ctx, authUser interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAuthUserRepository)(nil).Update), ctx, authUser)
-}
-
-// MockAuthPrincipalRepository is a mock of AuthPrincipalRepository interface.
-type MockAuthPrincipalRepository struct {
-	ctrl     *gomock.Controller
-	recorder *MockAuthPrincipalRepositoryMockRecorder
-}
-
-// MockAuthPrincipalRepositoryMockRecorder is the mock recorder for MockAuthPrincipalRepository.
-type MockAuthPrincipalRepositoryMockRecorder struct {
-	mock *MockAuthPrincipalRepository
-}
-
-// NewMockAuthPrincipalRepository creates a new mock instance.
-func NewMockAuthPrincipalRepository(ctrl *gomock.Controller) *MockAuthPrincipalRepository {
-	mock := &MockAuthPrincipalRepository{ctrl: ctrl}
-	mock.recorder = &MockAuthPrincipalRepositoryMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAuthPrincipalRepository) EXPECT() *MockAuthPrincipalRepositoryMockRecorder {
-	return m.recorder
-}
-
-// ExistsByUsername mocks base method.
-func (m *MockAuthPrincipalRepository) ExistsByUsername(ctx context.Context, username string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExistsByUsername", ctx, username)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// ExistsByUsername indicates an expected call of ExistsByUsername.
-func (mr *MockAuthPrincipalRepositoryMockRecorder) ExistsByUsername(ctx, username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByUsername", reflect.TypeOf((*MockAuthPrincipalRepository)(nil).ExistsByUsername), ctx, username)
-}
-
-// FindByUsername mocks base method.
-func (m *MockAuthPrincipalRepository) FindByUsername(ctx context.Context, username string) ([]models.AuthPrincipal, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByUsername", ctx, username)
+	ret := m.ctrl.Call(m, "FindPrincipalByUsernameAndApplication", ctx, tx, username, application)
 	ret0, _ := ret[0].([]models.AuthPrincipal)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindByUsername indicates an expected call of FindByUsername.
-func (mr *MockAuthPrincipalRepositoryMockRecorder) FindByUsername(ctx, username interface{}) *gomock.Call {
+// FindPrincipalByUsernameAndApplication indicates an expected call of FindPrincipalByUsernameAndApplication.
+func (mr *MockRepositoryMockRecorder) FindPrincipalByUsernameAndApplication(ctx, tx, username, application interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUsername", reflect.TypeOf((*MockAuthPrincipalRepository)(nil).FindByUsername), ctx, username)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindPrincipalByUsernameAndApplication", reflect.TypeOf((*MockRepository)(nil).FindPrincipalByUsernameAndApplication), ctx, tx, username, application)
 }
