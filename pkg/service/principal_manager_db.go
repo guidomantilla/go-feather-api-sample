@@ -219,6 +219,23 @@ func (manager *DBPrincipalManager) Exists(ctx context.Context, username string) 
 func (manager *DBPrincipalManager) ChangePassword(ctx context.Context, username string, password string) error {
 	return manager.transactionHandler.HandleTransaction(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
 
+		var err error
+		authUser := &models.AuthUser{
+			Username: &username,
+		}
+		if err = manager.repository.FindUserById(ctx, authUser); err != nil {
+			return errors.New("principal does not exists")
+		}
+
+		authUser.Password, err = manager.passwordManager.Encode(password)
+		if err != nil {
+			return err
+		}
+
+		if err = manager.repository.SaveUser(ctx, authUser); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

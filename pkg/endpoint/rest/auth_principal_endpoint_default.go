@@ -31,7 +31,7 @@ func (endpoint *DefaultAuthPrincipalEndpoint) Create(ctx *gin.Context) {
 		return
 	}
 
-	if errs := endpoint.validate(principal); errs != nil {
+	if errs := endpoint.validateUpsert(principal); errs != nil {
 		ex := feather_web_rest.BadRequestException("error validating the principal", errs...)
 		ctx.AbortWithStatusJSON(ex.Code, ex)
 		return
@@ -57,7 +57,8 @@ func (endpoint *DefaultAuthPrincipalEndpoint) Create(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, nil)
+	principal.Password, principal.Passphrase = nil, nil
+	ctx.JSON(http.StatusCreated, principal)
 }
 
 func (endpoint *DefaultAuthPrincipalEndpoint) Update(ctx *gin.Context) {
@@ -70,7 +71,7 @@ func (endpoint *DefaultAuthPrincipalEndpoint) Update(ctx *gin.Context) {
 		return
 	}
 
-	if errs := endpoint.validate(principal); errs != nil {
+	if errs := endpoint.validateUpsert(principal); errs != nil {
 		ex := feather_web_rest.BadRequestException("error validating the principal", errs...)
 		ctx.AbortWithStatusJSON(ex.Code, ex)
 		return
@@ -100,7 +101,7 @@ func (endpoint *DefaultAuthPrincipalEndpoint) Update(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, principal)
 }
 
-func (endpoint *DefaultAuthPrincipalEndpoint) validate(principal *feather_security.Principal) []error {
+func (endpoint *DefaultAuthPrincipalEndpoint) validateUpsert(principal *feather_security.Principal) []error {
 
 	var errors []error
 
@@ -189,7 +190,7 @@ func (endpoint *DefaultAuthPrincipalEndpoint) Delete(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, nil)
+	ctx.JSON(http.StatusNoContent, nil)
 }
 
 func (endpoint *DefaultAuthPrincipalEndpoint) FindByUsername(ctx *gin.Context) {
@@ -256,4 +257,91 @@ func (endpoint *DefaultAuthPrincipalEndpoint) FindCurrent(ctx *gin.Context) {
 
 func (endpoint *DefaultAuthPrincipalEndpoint) ChangePassword(ctx *gin.Context) {
 
+	var err error
+	var principal *feather_security.Principal
+	if err = ctx.ShouldBindJSON(&principal); err != nil {
+		ex := feather_web_rest.BadRequestException("error unmarshalling request json to object")
+		ctx.AbortWithStatusJSON(ex.Code, ex)
+		return
+	}
+
+	if errs := endpoint.validateChangePassword(principal); errs != nil {
+		ex := feather_web_rest.BadRequestException("error validating the principal", errs...)
+		ctx.AbortWithStatusJSON(ex.Code, ex)
+		return
+	}
+
+	var exists bool
+	var current *feather_security.Principal
+	if current, exists = feather_security.GetPrincipalFromContext(ctx); !exists {
+		ex := feather_web_rest.NotFoundException("principal not found in context")
+		ctx.AbortWithStatusJSON(ex.Code, ex)
+		return
+	}
+
+	if !reflect.DeepEqual(current.Username, principal.Username) {
+		ex := feather_web_rest.BadRequestException("authorized username must be the same as the username to update")
+		ctx.AbortWithStatusJSON(ex.Code, ex)
+		return
+	}
+
+	if err = endpoint.principalManager.ChangePassword(ctx.Request.Context(), *principal.Username, *principal.Password); err != nil {
+		ex := feather_web_rest.InternalServerErrorException(err.Error())
+		ctx.AbortWithStatusJSON(ex.Code, ex)
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (endpoint *DefaultAuthPrincipalEndpoint) validateChangePassword(principal *feather_security.Principal) []error {
+
+	var errors []error
+
+	if err := feather_commons_validation.ValidateFieldIsRequired("this", "username", principal.Username); err != nil {
+		errors = append(errors, err)
+	}
+
+	if err := feather_commons_validation.ValidateFieldMustBeUndefined("this", "role", principal.Role); err != nil {
+		errors = append(errors, err)
+	}
+
+	if err := feather_commons_validation.ValidateFieldIsRequired("this", "password", principal.Password); err != nil {
+		errors = append(errors, err)
+	}
+
+	if err := feather_commons_validation.ValidateFieldMustBeUndefined("this", "passphrase", principal.Passphrase); err != nil {
+		errors = append(errors, err)
+	}
+
+	if err := feather_commons_validation.ValidateFieldMustBeUndefined("this", "enabled", principal.Enabled); err != nil {
+		errors = append(errors, err)
+	}
+
+	if err := feather_commons_validation.ValidateFieldMustBeUndefined("this", "non_locked", principal.NonLocked); err != nil {
+		errors = append(errors, err)
+	}
+
+	if err := feather_commons_validation.ValidateFieldMustBeUndefined("this", "non_expired", principal.NonExpired); err != nil {
+		errors = append(errors, err)
+	}
+
+	if err := feather_commons_validation.ValidateFieldMustBeUndefined("this", "password_non_expired", principal.PasswordNonExpired); err != nil {
+		errors = append(errors, err)
+	}
+
+	if err := feather_commons_validation.ValidateFieldMustBeUndefined("this", "signup_done", principal.SignUpDone); err != nil {
+		errors = append(errors, err)
+	}
+
+	if err := feather_commons_validation.ValidateStructMustBeUndefined("this", "resources", principal.Resources); err != nil {
+		errors = append(errors, err)
+		return errors
+	}
+
+	if err := feather_commons_validation.ValidateFieldMustBeUndefined("this", "token", principal.Token); err != nil {
+		errors = append(errors, err)
+	}
+
+	return errors
 }
