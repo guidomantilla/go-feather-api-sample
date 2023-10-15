@@ -66,12 +66,10 @@ insert into auth_access_control_list (role, resource, permission, enabled) value
 insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals/:username', 'GET', true);
 insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals', 'POST', true);
 insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals', 'PUT', true);
-insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals', 'DELETE', true);
+insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals/:username', 'DELETE', true);
 insert into auth_access_control_list (role, resource, permission, enabled) values ('admin', '/api/principals/change-password', 'PATCH', true);
 
 insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/api/principals/current', 'GET', true);
-insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/api/principals', 'POST', true);
-insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/api/principals', 'PUT', true);
 insert into auth_access_control_list (role, resource, permission, enabled) values ('user', '/api/principals/change-password', 'PATCH', true);
 
 insert into auth_users (username, role, password, passphrase, enabled) values ('root', 'admin', '{bcrypt}$2a$10$DMrp3hAmPg0EV16AchnF0.rdTiHJ/g3k7J9klzGVZoiZOzSR3u/le', '', true);

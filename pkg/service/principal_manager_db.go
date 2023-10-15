@@ -49,7 +49,7 @@ func (manager *DBPrincipalManager) Update(ctx context.Context, principal *feathe
 
 	err := manager.Upsert(ctx, principal, "Update")
 	if err != nil {
-		return feather_commons_errors.ErrJoin(errors.New("error creating principal"), err)
+		return feather_commons_errors.ErrJoin(errors.New("error updating principal"), err)
 	}
 
 	return nil
@@ -64,10 +64,10 @@ func (manager *DBPrincipalManager) Upsert(ctx context.Context, principal *feathe
 			Username: principal.Username,
 		}
 		err = manager.repository.FindUserById(ctx, queryBy)
-		if mode == "Create" && err != nil {
-			return err
-		} else if mode == "Update" && err == nil {
-			return err
+		if mode == "Create" && err == nil {
+			return errors.New("principal already exists")
+		} else if mode == "Update" && err != nil {
+			return errors.New("principal does not exists")
 		}
 
 		authRole := &models.AuthRole{
@@ -129,8 +129,39 @@ func (manager *DBPrincipalManager) Upsert(ctx context.Context, principal *feathe
 }
 
 func (manager *DBPrincipalManager) Delete(ctx context.Context, username string) error {
-
 	return manager.transactionHandler.HandleTransaction(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+
+		queryBy := &models.AuthPrincipal{
+			Username:    feather_commons_util.ValueToPtr(username),
+			Application: feather_commons_util.ValueToPtr(config.Application),
+		}
+
+		var authPrincipals []models.AuthPrincipal
+		authPrincipals, err := manager.repository.FindPrincipalById(ctx, queryBy)
+		if err != nil {
+			return err
+		}
+		if len(authPrincipals) == 0 {
+			return errors.New("principal does not exists")
+		}
+
+		if err = manager.repository.DeleteUser(ctx, &models.AuthUser{Username: &username}); err != nil {
+			return err
+		}
+
+		for _, principal := range authPrincipals {
+			if err = manager.repository.DeleteAccessControlList(ctx, &models.AuthAccessControlList{Role: principal.Role, Resource: principal.Resource, Permission: principal.Permission}); err != nil {
+				return err
+			}
+
+			if err = manager.repository.DeleteResource(ctx, &models.AuthResource{Name: principal.Resource}); err != nil {
+				return err
+			}
+		}
+
+		if err = manager.repository.DeleteRole(ctx, &models.AuthRole{Name: authPrincipals[0].Role}); err != nil {
+			return err
+		}
 
 		return nil
 	})
@@ -152,7 +183,7 @@ func (manager *DBPrincipalManager) Find(ctx context.Context, username string) (*
 			return err
 		}
 		if len(authPrincipals) == 0 {
-			return errors.New("no principal found")
+			return errors.New("principal does not exists")
 		}
 
 		resources := feather_commons_collections.Map[models.AuthPrincipal, string](authPrincipals, func(principal models.AuthPrincipal, _ int) string {

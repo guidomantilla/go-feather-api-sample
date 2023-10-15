@@ -3,6 +3,7 @@ package rest
 import (
 	"io"
 	"net/http"
+	"reflect"
 
 	"github.com/gin-gonic/gin"
 	feather_commons_validation "github.com/guidomantilla/go-feather-commons/pkg/validation"
@@ -36,8 +37,22 @@ func (endpoint *DefaultAuthPrincipalEndpoint) Create(ctx *gin.Context) {
 		return
 	}
 
+	var exists bool
+	var current *feather_security.Principal
+	if current, exists = feather_security.GetPrincipalFromContext(ctx); !exists {
+		ex := feather_web_rest.NotFoundException("principal not found in context")
+		ctx.AbortWithStatusJSON(ex.Code, ex)
+		return
+	}
+
+	if reflect.DeepEqual(current.Username, principal.Username) {
+		ex := feather_web_rest.BadRequestException("authorized username cannot be the same as the new username")
+		ctx.AbortWithStatusJSON(ex.Code, ex)
+		return
+	}
+
 	if err = endpoint.principalManager.Create(ctx.Request.Context(), principal); err != nil {
-		ex := feather_web_rest.UnauthorizedException(err.Error())
+		ex := feather_web_rest.InternalServerErrorException(err.Error())
 		ctx.AbortWithStatusJSON(ex.Code, ex)
 		return
 	}
@@ -61,8 +76,22 @@ func (endpoint *DefaultAuthPrincipalEndpoint) Update(ctx *gin.Context) {
 		return
 	}
 
+	var exists bool
+	var current *feather_security.Principal
+	if current, exists = feather_security.GetPrincipalFromContext(ctx); !exists {
+		ex := feather_web_rest.NotFoundException("principal not found in context")
+		ctx.AbortWithStatusJSON(ex.Code, ex)
+		return
+	}
+
+	if reflect.DeepEqual(current.Username, principal.Username) {
+		ex := feather_web_rest.BadRequestException("authorized username cannot be the same as the username to update")
+		ctx.AbortWithStatusJSON(ex.Code, ex)
+		return
+	}
+
 	if err = endpoint.principalManager.Update(ctx.Request.Context(), principal); err != nil {
-		ex := feather_web_rest.UnauthorizedException(err.Error())
+		ex := feather_web_rest.InternalServerErrorException(err.Error())
 		ctx.AbortWithStatusJSON(ex.Code, ex)
 		return
 	}
@@ -139,9 +168,23 @@ func (endpoint *DefaultAuthPrincipalEndpoint) Delete(ctx *gin.Context) {
 		return
 	}
 
+	var exists bool
+	var current *feather_security.Principal
+	if current, exists = feather_security.GetPrincipalFromContext(ctx); !exists {
+		ex := feather_web_rest.NotFoundException("principal not found in context")
+		ctx.AbortWithStatusJSON(ex.Code, ex)
+		return
+	}
+
 	username := ctx.Param("username")
+	if reflect.DeepEqual(current.Username, &username) {
+		ex := feather_web_rest.BadRequestException("authorized username cannot be the same as the username to delete")
+		ctx.AbortWithStatusJSON(ex.Code, ex)
+		return
+	}
+
 	if err = endpoint.principalManager.Delete(ctx.Request.Context(), username); err != nil {
-		ex := feather_web_rest.UnauthorizedException(err.Error())
+		ex := feather_web_rest.InternalServerErrorException(err.Error())
 		ctx.AbortWithStatusJSON(ex.Code, ex)
 		return
 	}
@@ -168,7 +211,7 @@ func (endpoint *DefaultAuthPrincipalEndpoint) FindByUsername(ctx *gin.Context) {
 	var principal *feather_security.Principal
 	username := ctx.Param("username")
 	if principal, err = endpoint.principalManager.Find(ctx.Request.Context(), username); err != nil {
-		ex := feather_web_rest.UnauthorizedException(err.Error())
+		ex := feather_web_rest.NotFoundException(err.Error())
 		ctx.AbortWithStatusJSON(ex.Code, ex)
 		return
 	}
@@ -202,7 +245,7 @@ func (endpoint *DefaultAuthPrincipalEndpoint) FindCurrent(ctx *gin.Context) {
 	}
 
 	if principal, err = endpoint.principalManager.Find(ctx.Request.Context(), *principal.Username); err != nil {
-		ex := feather_web_rest.UnauthorizedException(err.Error())
+		ex := feather_web_rest.InternalServerErrorException(err.Error())
 		ctx.AbortWithStatusJSON(ex.Code, ex)
 		return
 	}

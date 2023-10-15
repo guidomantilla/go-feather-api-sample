@@ -30,9 +30,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		DatabaseEnabled:   true,
 	}
 
-	queriesMap := repositories.BuildQueries()
-	repository := repositories.NewDefaultRepository(queriesMap)
-
+	var repository repositories.Repository
 	builder := feather_boot.NewBeanBuilder(ctx)
 	builder.Config = func(appCtx *feather_boot.ApplicationContext) {
 		var cfg config.Config
@@ -64,6 +62,8 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 			DatasourceUsername: cfg.DatasourceUsername,
 			DatasourcePassword: cfg.DatasourcePassword,
 		}
+
+		repository = repositories.NewDefaultRepository(appCtx.DatabaseConfig)
 	}
 	builder.PrincipalManager = func(appCtx *feather_boot.ApplicationContext) feather_security.PrincipalManager {
 		return service.NewDBPrincipalManager(appCtx.TransactionHandler, appCtx.PasswordManager, repository)
@@ -79,7 +79,7 @@ func ExecuteCmdFn(_ *cobra.Command, args []string) {
 		appCtx.PrivateRouter.GET("/principals/:username", authPrincipalEndpoint.FindByUsername)
 		appCtx.PrivateRouter.POST("/principals", authPrincipalEndpoint.Create)
 		appCtx.PrivateRouter.PUT("/principals", authPrincipalEndpoint.Update)
-		appCtx.PrivateRouter.DELETE("/principals", authPrincipalEndpoint.Delete)
+		appCtx.PrivateRouter.DELETE("/principals/:username", authPrincipalEndpoint.Delete)
 		appCtx.PrivateRouter.PATCH("/principals/change-password", authPrincipalEndpoint.ChangePassword)
 
 		return nil
