@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
-	feather_web_rest "github.com/guidomantilla/go-feather-web/pkg/rest"
+	feather_web_rest "github.com/guidomantilla/go-feather-lib/pkg/rest"
+	feather_security "github.com/guidomantilla/go-feather-lib/pkg/security"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"

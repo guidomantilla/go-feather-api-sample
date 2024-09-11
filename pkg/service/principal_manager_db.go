@@ -5,16 +5,14 @@ import (
 	"errors"
 	"strings"
 
-	feather_commons_collections "github.com/guidomantilla/go-feather-commons/pkg/collections"
-	feather_commons_errors "github.com/guidomantilla/go-feather-commons/pkg/errors"
-	feather_commons_util "github.com/guidomantilla/go-feather-commons/pkg/util"
-	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
-	feather_sql_datasource "github.com/guidomantilla/go-feather-sql/pkg/datasource"
+	"github.com/guidomantilla/go-feather-lib/pkg/config"
+	feather_sql_datasource "github.com/guidomantilla/go-feather-lib/pkg/datasource"
+	feather_security "github.com/guidomantilla/go-feather-lib/pkg/security"
+	feather_commons_util "github.com/guidomantilla/go-feather-lib/pkg/util"
 	"github.com/jmoiron/sqlx"
+	"gorm.io/gorm"
 
-	"github.com/guidomantilla/go-feather-api-sample/pkg/config"
 	"github.com/guidomantilla/go-feather-api-sample/pkg/models"
-	"github.com/guidomantilla/go-feather-api-sample/pkg/repositories"
 )
 
 var (
@@ -24,35 +22,25 @@ var (
 type DBPrincipalManager struct {
 	transactionHandler feather_sql_datasource.TransactionHandler
 	passwordManager    feather_security.PasswordManager
-	repository         repositories.Repository
 }
 
-func NewDBPrincipalManager(transactionHandler feather_sql_datasource.TransactionHandler, passwordManager feather_security.PasswordManager, repository repositories.Repository) *DBPrincipalManager {
+func NewDBPrincipalManager(transactionHandler feather_sql_datasource.TransactionHandler, passwordManager feather_security.PasswordManager) *DBPrincipalManager {
 	return &DBPrincipalManager{
 		transactionHandler: transactionHandler,
 		passwordManager:    passwordManager,
-		repository:         repository,
 	}
 }
 
 func (manager *DBPrincipalManager) Create(ctx context.Context, principal *feather_security.Principal) error {
-
-	err := manager.Upsert(ctx, principal, "Create")
-	if err != nil {
-		return feather_commons_errors.ErrJoin(errors.New("error creating principal"), err)
-	}
-
-	return nil
+	return manager.transactionHandler.HandleTransaction(ctx, func(ctx context.Context, tx *gorm.DB) error {
+		return tx.Create(principal).Error
+	})
 }
 
 func (manager *DBPrincipalManager) Update(ctx context.Context, principal *feather_security.Principal) error {
-
-	err := manager.Upsert(ctx, principal, "Update")
-	if err != nil {
-		return feather_commons_errors.ErrJoin(errors.New("error updating principal"), err)
-	}
-
-	return nil
+	return manager.transactionHandler.HandleTransaction(ctx, func(ctx context.Context, tx *gorm.DB) error {
+		return tx.Save(principal).Error
+	})
 }
 
 func (manager *DBPrincipalManager) Upsert(ctx context.Context, principal *feather_security.Principal, mode string) error {
@@ -186,9 +174,9 @@ func (manager *DBPrincipalManager) Find(ctx context.Context, username string) (*
 			return errors.New("principal does not exists")
 		}
 
-		resources := feather_commons_collections.Map[models.AuthPrincipal, string](authPrincipals, func(principal models.AuthPrincipal, _ int) string {
+		resources := feather_commons_streams.Map[models.AuthPrincipal, string](feather_commons_streams.Build(authPrincipals), func(principal models.AuthPrincipal) string {
 			return strings.Join([]string{*principal.Application, *principal.Permission, *principal.Resource}, " ")
-		})
+		}).ToArray()
 
 		principal = &feather_security.Principal{
 			Username:           authPrincipals[0].Username,

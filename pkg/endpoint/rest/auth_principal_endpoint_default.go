@@ -6,9 +6,9 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	feather_commons_validation "github.com/guidomantilla/go-feather-commons/pkg/validation"
-	feather_security "github.com/guidomantilla/go-feather-security/pkg/security"
-	feather_web_rest "github.com/guidomantilla/go-feather-web/pkg/rest"
+	feather_web_rest "github.com/guidomantilla/go-feather-lib/pkg/rest"
+	feather_security "github.com/guidomantilla/go-feather-lib/pkg/security"
+	feather_commons_validation "github.com/guidomantilla/go-feather-lib/pkg/validation"
 )
 
 type DefaultAuthPrincipalEndpoint struct {

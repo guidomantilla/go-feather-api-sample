@@ -1,6 +1,8 @@
 package rest
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 var (
 	_ AuthPrincipalEndpoint = (*DefaultAuthPrincipalEndpoint)(nil)
